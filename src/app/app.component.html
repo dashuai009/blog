@@ -1,20 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-
-<body>
-  这是一个博客
-  <br>
-  testasfdadsfadsffda方爱上地方asdfasdfa啊啊啊<br>
-
-  adfadfasdfasdfasdffasdfadf
-  <a href="https://www.npmjs.com/package/angular-cli-ghpages#quickstart-local">搭建过程</a>
-  坑点：<div>ng deploy --base-href=/repositoryname/</div>不要忘掉两个/ 不然资源路径不对
-</body>
-
-</html>
+<div class="app-container">
+  <div class="app-bar">
+    <header>
+      <a routerLink="/" routerLinkActive="active">
+        <img src="../../assets/fan.ico" />
+        <span class="text">dashuai</span>
+      </a>
+      <div class="main-nav">
+        <a class="main-nav-item" routerLink="/list" routerLinkActive="active">
+          <span>文章列表</span>
+        </a>
+        <a class="main-nav-item" routerLink="/tag" routerLinkActive="active">
+          <span>分类标签</span>
+        </a>
+        <a class="main-nav-item" routerLink="/gsp" routerLinkActive="active">
+          <span>几何画板</span>
+        </a>
+        <!--
+                  <a class="main-nav-item" target="_blank" rel="noopener noreferrer"
+                      href="https://github.com/dashuai009/blog" routerLinkActive="active">
+                      <span>博客代码</span>
+                  </a>
+              -->
+        <span class="main-nav-item">
+          <app-theme-picker></app-theme-picker>
+        </span>
+      </div>
+      <div id="headerMenu" class="header-menu"><span></span></div>
+    </header>
+    这是一个博客
+    <br>
+    <h2>头秃过程</h2>
+    <h3>改npm库</h3>
+    需要改ng-devui中的sytle和style-var库，不是很优美。
+    <h3>app-theme-picker需要将自定义主题自行插进去</h3>
+  </div>
+</div>
