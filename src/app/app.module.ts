@@ -8,12 +8,20 @@ import { DevUIModule } from 'ng-devui';
 import { DEVUI_LANG, ZH_CN } from 'ng-devui/i18n';
 import { AppComponent } from './app.component';
 import { ThemePickerModule } from './theme-picker/theme-picker.module';
+import { HomeComponent } from './home/home.component';
+import { ListComponent } from './list/list.component';
+import { TagComponent } from './tag/tag.component';
+import { GspComponent } from './gsp/gsp.component';
 
 
 
 @NgModule({
   declarations: [
     AppComponent,
+    HomeComponent,
+    ListComponent,
+    TagComponent,
+    GspComponent,
   ],
   imports: [
     BrowserModule,
@@ -25,11 +33,12 @@ import { ThemePickerModule } from './theme-picker/theme-picker.module';
     HttpClientModule,
     RouterModule.forRoot(
       [
-        {
-          path: '',
-          redirectTo: '',
-          pathMatch: 'full'
-        }
+        { path: '', component: HomeComponent },
+        { path: 'home', component: HomeComponent },
+        { path: 'list', component: ListComponent },
+        { path: 'gsp', component: GspComponent },
+        { path: 'tag', component: TagComponent },
+        { path: '**', component: HomeComponent }
       ]
     )
   ],
