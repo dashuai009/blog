@@ -1,1 +1,9 @@
-<p>list works!</p>
+<div class="list-component">
+    <div class="list">
+        <li *ngFor="let item of listArray">
+            <a routerLink="/article/{{item.name}}" routerLinkActive="active">
+                <span>{{item.name}}</span>
+            </a>
+        </li>
+    </div>
+</div>

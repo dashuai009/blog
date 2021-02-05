@@ -1,0 +1,11 @@
+@import "~ng-devui/styles-var/devui-var.scss";
+@import "~ng-devui/style/core/font";
+
+.list-component{
+    color: $devui-text;
+    background-color: $devui-base-bg;   
+    margin:50px 10% auto;
+    .list{
+
+    }  
+}

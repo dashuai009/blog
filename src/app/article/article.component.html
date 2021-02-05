@@ -1,0 +1,16 @@
+<div class="article">
+    <div class="bar">
+        <p>article works!</p>
+        <p>article works!</p>
+    </div>
+    
+    <div [innerHtml]="result" class="main-item"></div>
+
+    <d-back-top [customTemplate]="customTemplate" [bottom]="'100px'">
+        <ng-template #customTemplate>
+            <div class="devui-backtop-custom" dTooltip [content]="'回到顶部'" [position]="'left'">
+                <span class="icon icon-arrow-up"></span>
+            </div>
+        </ng-template>
+    </d-back-top>
+</div>

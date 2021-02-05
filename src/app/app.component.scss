@@ -50,40 +50,42 @@
     }
 }
 
+//https://css.doyoe.com/
+
 .app-container {
-    display: flex;
-    flex-direction: column;
-    transform: none;
+    display: flex;//将对象作为弹性伸缩盒显示。（伸缩盒最新版本）（CSS3）
+    flex-direction: column;//纵向从上往下排列（顶对齐）。
+    transform: none;//无变换
 
     .app-bar {
-        position: fixed;
+        position: fixed;//fixed：与absolute一致，但偏移定位是以窗口为参考。当出现滚动条时，对象不会随着滚动。
         top: 0;
         left: 0;
         right: 0;
-        z-index: 10;
+        z-index: 10;//用于确定元素在当前层叠上下文中的层叠级别，并确定该元素是否创建新的局部层叠上下文。
     }
 
-    a.main-nav-item {
+    a.main-nav-item {//设置或检索在对象上移动的鼠标指针采用何种系统预定义的光标形状。
         cursor: pointer;
     }
 
     header {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
+        align-items: center;//弹性盒子元素在该行的侧轴（纵轴）上居中放置。（如果该行的尺寸小于弹性盒子元素的尺寸，则会向两个方向溢出相同的长度）。
+        justify-content: space-between;//弹性盒子元素会平均地分布在行里。如果最左边的剩余空间是负数，或该行只有一个子元素，则该值等效于'flex-start'。在其它情况下，第一个元素的边界与行的主起始位置的边界对齐，同时最后一个元素的边界与行的主结束位置的边距对齐，而剩余的伸缩盒项目则平均分布，并确保两两之间的空白空间相等。
         width: 100%;
         height: 50px;
         background: $devui-base-bg;
-        box-shadow: 0 2px 4px 0 $devui-shadow;
+        box-shadow: 0 2px 4px 0 $devui-shadow;//定义元素的阴影。
 
         a {
-            line-height: $line-height-base;
+            line-height: $line-height-base;//定义元素中行框的最小高度。 $line-height-base=1.5，  使用因子方式定义line-height是非常安全的方式，将可以避免文字重叠的现象。
             color: $devui-text;
-            text-decoration: none;
+            text-decoration: none;//修饰文本外观下划线之类
         }
 
-        a:hover,
-        a:focus {
+        a:hover,//	选择鼠标在链接上面时
+        a:focus {//选择具有焦点的输入元素
             color: $devui-text;
             text-decoration: none;
         }
