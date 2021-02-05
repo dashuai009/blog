@@ -1,11 +1,15 @@
 @import "~ng-devui/styles-var/devui-var.scss";
 @import "~ng-devui/style/core/font";
 
-.list-component{
-    color: $devui-text;
-    background-color: $devui-base-bg;   
-    margin:50px 10% auto;
-    .list{
+.list-component {
+  color: $devui-text;
+  background-color: $devui-base-bg;
+  margin: 50px 10% auto;
+  .list {
+    .list-item {
+      height: 30px;
 
-    }  
+      box-shadow: 0 2px 2px 0px $devui-shadow; //定义元素的阴影。
+    }
+  }
 }

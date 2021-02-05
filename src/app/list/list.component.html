@@ -1,6 +1,6 @@
 <div class="list-component">
     <div class="list">
-        <li *ngFor="let item of listArray">
+        <li *ngFor="let item of listArray" class="list-item">
             <a routerLink="/article/{{item.name}}" routerLinkActive="active">
                 <span>{{item.name}}</span>
             </a>
