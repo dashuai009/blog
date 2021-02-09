@@ -10,7 +10,7 @@ const myOptions = {
   }),
   responseType: 'text' as 'json'
 };
-export const api = "http://127.0.0.1:3000";
+export const api = "http://106.14.58.177:3000";
 
 export interface articleLink {
   title: string,
