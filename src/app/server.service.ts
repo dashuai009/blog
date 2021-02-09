@@ -10,11 +10,20 @@ const myOptions = {
   }),
   responseType: 'text' as 'json'
 };
-const api = "http://127.0.0.1:3000";
+export const api = "http://127.0.0.1:3000";
 
 export interface articleLink {
-  name: string
+  title: string,
+  link: string,
+  tags: string[],
+  date: string
 }
+
+export interface articleData {
+  article: articleLink,
+  data: string
+}
+
 @Injectable({
   providedIn: 'root'
 })

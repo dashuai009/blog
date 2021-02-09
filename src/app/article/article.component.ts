@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { ServerService } from '../server.service';
+import { ServerService, api } from '../server.service';
+
 import { ActivatedRoute } from '@angular/router';
 
 import { DomSanitizer } from '@angular/platform-browser';
 import * as md from 'markdown-it';
 import * as hljs from 'highlight.js';
 import * as latex from 'markdown-it-katex';
+import * as cheerio from 'cheerio';
 
 
 const latexOptions = {
@@ -28,12 +30,12 @@ export class ArticleComponent implements OnInit {
     private sanitizer: DomSanitizer, private myServer: ServerService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    console.log(latex);
     const articleName = this.route.snapshot.paramMap.get('name');
     console.log(articleName);
     this.myServer.getArticle(articleName).subscribe(res => {
       //console.log(res);
       let tmp = md({
+        html: true,        // 在源码中启用 HTML 标签
         linkify: true,        // 将类似 URL 的文本自动转换为链接。
 
         // 启用一些语言中立的替换 + 引号美化
@@ -73,7 +75,18 @@ export class ArticleComponent implements OnInit {
         }
       }).use(latex, { "throwOnError": false, "errorColor": " #cc0000" })
         .render(`${res}`);
-      this.result = this.sanitizer.bypassSecurityTrustHtml(tmp);
+
+
+      let needToChange = cheerio.load(tmp);
+      needToChange("img").each(
+        function () {
+          var imgSrc;
+          imgSrc = needToChange(this).attr("src");
+          console.log(imgSrc);
+          needToChange(this).attr("src", api + `/getImg/${imgSrc}/`);
+        }
+      );
+      this.result = this.sanitizer.bypassSecurityTrustHtml(needToChange.html());
     });
   }
 

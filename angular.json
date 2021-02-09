@@ -21,7 +21,10 @@
               "enquire.js",
               "date-fns/parse",
               "date-fns/format",
-              "markdown-it-katex"
+              "markdown-it-katex",
+              "markdown-it",
+              "cheerio",
+              "highlight.js"
             ],
             "outputPath": "dist/blog",
             "index": "src/index.html",
@@ -37,7 +40,7 @@
               "src/styles.scss",
               "node_modules/ng-devui/devui.min.css",
               "node_modules/@devui-design/icons/icomoon/devui-icon.css"
-           ],
+            ],
             "scripts": []
           },
           "configurations": {
