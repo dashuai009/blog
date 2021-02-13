@@ -10,7 +10,7 @@ const myOptions = {
   }),
   responseType: 'text' as 'json'
 };
-export const api = "http://106.14.58.177:3000";
+export const api = "http://106.14.58.177";
 
 export interface articleLink {
   title: string,
@@ -49,7 +49,7 @@ export class ServerService {
     return this.myConnect.get<articleLink[]>(api + '/list')
       .pipe(
         retry(3), // retry a failed request up to 3 times
-        catchError(this.handleError) // then handle the error
+        //catchError(this.handleError) // then handle the error
       )
   }
 

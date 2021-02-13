@@ -34,7 +34,12 @@ export class ArticleComponent implements OnInit {
     console.log(articleName);
     this.myServer.getArticle(articleName).subscribe(res => {
       //console.log(res);
-      let tmp = md({
+      let header = res.split("....------....-")[0];
+      let articleBody = res.slice(header.length + 14);
+
+      //"good_luck_buddy".split(/_(.+)/)[1]
+      //"luck_buddy"
+      let needToChange = md({
         html: true,        // 在源码中启用 HTML 标签
         linkify: true,        // 将类似 URL 的文本自动转换为链接。
 
@@ -74,18 +79,18 @@ export class ArticleComponent implements OnInit {
             '</code></pre>'
         }
       }).use(latex, { "throwOnError": false, "errorColor": " #cc0000" })
-        .render(`${res}`);
+        .render(`${articleBody}`);
 
-
-      let needToChange = cheerio.load(tmp);
-      needToChange("img").each(
-        function () {
-          var imgSrc;
-          imgSrc = needToChange(this).attr("src");
-          console.log(imgSrc);
-          needToChange(this).attr("src", api + `/getImg/${imgSrc}/`);
-        }
-      );
+      /*
+            let needToChange = cheerio.load(tmp);
+            needToChange("img").each(
+              function () {
+                var imgSrc;
+                imgSrc = needToChange(this).attr("src");
+                console.log(imgSrc);
+                needToChange(this).attr("src", api + `/getImg/${imgSrc}/`);
+              }
+            );*/
       this.result = this.sanitizer.bypassSecurityTrustHtml(needToChange.html());
     });
   }
