@@ -54,7 +54,7 @@ export class ServerService {
 
   getArticle(name: string): Observable<string> {
     console.log(name);
-    return this.myConnect.get<string>(name, myOptions)
+    return this.myConnect.get<string>(api + '/' + name, myOptions)
       .pipe(
         retry(3),
       )

@@ -91,7 +91,7 @@ export class ArticleComponent implements OnInit {
                 needToChange(this).attr("src", api + `/getImg/${imgSrc}/`);
               }
             );*/
-      this.result = this.sanitizer.bypassSecurityTrustHtml(needToChange.html());
+      this.result = this.sanitizer.bypassSecurityTrustHtml(needToChange);
     });
   }
 
