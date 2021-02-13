@@ -33,7 +33,7 @@ export class ArticleComponent implements OnInit {
     const articleName = this.route.snapshot.paramMap.get('name');
     console.log(articleName);
     this.myServer.getArticle(articleName).subscribe(res => {
-      //console.log(res);
+      console.log(res);
       let header = res.split("....------....-")[0];
       let articleBody = res.slice(header.length + 14);
 
