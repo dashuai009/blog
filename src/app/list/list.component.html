@@ -1,9 +1,27 @@
 <div class="list-component">
     <div class="list">
-        <li *ngFor="let item of listArray" class="list-item">
-            <a routerLink="/article/{{item.name}}" routerLinkActive="active">
-                <span>{{item.name}}</span>
-            </a>
-        </li>
+        <div *ngFor="let item of listArray" class="list-item">
+            <d-card style="width: 350px">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 16px">
+                    <!--<d-avatar style="vertical-align: middle" [imgSrc]="imgSrc" [width]="48" [height]="48"></d-avatar>-->
+                    <div style="font-size: 20px; cursor: pointer" class="icon-star-o"></div>
+                </div>
+                <d-card-header>
+                    <d-card-title>
+                        <a routerLink="/article/{{item.title}}" routerLinkActive="active">
+                            {{item.title}}
+                        </a>
+                    </d-card-title>
+                    <d-card-subtitle><i class="icon-company-member card-icon"></i><span>dashuai</span></d-card-subtitle>
+                </d-card-header>
+                <d-card-actions [align]="'spaceBetween'">
+                    <div class="action-text">更新于{{item.date}}</div>
+                    <div>
+                        <i class="icon-like card-icon"></i>
+                        <i class="icon-more-operate card-icon"></i>
+                    </div>
+                </d-card-actions>
+            </d-card>
+        </div>
     </div>
 </div>
