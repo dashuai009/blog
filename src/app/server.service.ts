@@ -14,7 +14,6 @@ export const api = "http://106.14.58.177";
 
 export interface articleLink {
   title: string,
-  link: string,
   tags: string[],
   date: string
 }
@@ -46,7 +45,7 @@ export class ServerService {
   }
 
   showList(): Observable<articleLink[]> {
-    return this.myConnect.get<articleLink[]>(api + '/list')
+    return this.myConnect.get<articleLink[]>(api + '/list.json')
       .pipe(
         retry(3), // retry a failed request up to 3 times
         //catchError(this.handleError) // then handle the error
@@ -54,9 +53,8 @@ export class ServerService {
   }
 
   getArticle(name: string): Observable<string> {
-    let file = { 'name': name };
-    console.log(file);
-    return this.myConnect.post<string>(api + '/article', file, myOptions)
+    console.log(name);
+    return this.myConnect.get<string>(name, myOptions)
       .pipe(
         retry(3),
       )
