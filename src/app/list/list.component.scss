@@ -13,6 +13,10 @@
       .action-text {
         color: $devui-aide-text;
       }
+      a {
+        color: black;
+        background: linear-gradient(to right, rgb(187, 255, 0), #2ed);
+      }
 
       .card-icon {
         cursor: pointer;
