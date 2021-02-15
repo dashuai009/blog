@@ -5,33 +5,39 @@
   color: $devui-text;
   background-color: $devui-base-bg;
   margin: 5px 10% auto;
+
+  d-tag {
+    margin: 4px;
+    zoom: 1.5;
+  }
   .list {
+    display: block;
     .list-item {
-      //height: 150px;
-
-      box-shadow: 0 2px 2px 0px $devui-shadow; //定义元素的阴影。
-      .action-text {
-        color: $devui-aide-text;
-      }
-      a {
-        color: black;
-        background: linear-gradient(to right, rgb(222, 255, 130), rgb(160, 255, 247));
-      }
-
-      .card-icon {
-        cursor: pointer;
-        font-size: $devui-font-size-icon;
-        vertical-align: middle;
-
-        &:not(:last-child) {
-          margin-right: 8px;
-        }
-      }
-      d-card {
-        &:hover {
-          box-shadow: $devui-shadow-length-hover $devui-light-shadow;
-        }
-      }
+      margin: 10px 10px 10px 10px;
+      width: 400px;
     }
+  }
+}
+d-card {
+  width: 350px;
+  a {
+    color: black;
+    background: linear-gradient(to right, rgb(222, 255, 130), rgb(160, 255, 247));
+  }
+
+  .card-icon {
+    cursor: pointer;
+    font-size: $devui-font-size-icon;
+    vertical-align: middle;
+
+    &:not(:last-child) {
+      margin-right: 8px;
+    }
+  }
+  .action-text {
+    color: $devui-aide-text;
+  }
+  &:hover {
+    box-shadow: $devui-shadow-length-hover $devui-light-shadow;
   }
 }

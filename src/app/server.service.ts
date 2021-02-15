@@ -15,7 +15,8 @@ export const api = "http://106.14.58.177";
 export interface articleLink {
   title: string,
   tags: string[],
-  date: string
+  date: string,
+  show: boolean;
 }
 
 export interface articleData {

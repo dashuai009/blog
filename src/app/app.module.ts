@@ -9,7 +9,6 @@ import { AppComponent } from './app.component';
 import { ThemePickerModule } from './theme-picker/theme-picker.module';
 import { HomeComponent } from './home/home.component';
 import { ListComponent } from './list/list.component';
-import { TagComponent } from './tag/tag.component';
 import { GspComponent } from './gsp/gsp.component';
 import { ArticleComponent } from './article/article.component';
 import { FsmComponent } from './fsm/fsm.component';
@@ -21,7 +20,6 @@ import { FsmComponent } from './fsm/fsm.component';
     AppComponent,
     HomeComponent,
     ListComponent,
-    TagComponent,
     GspComponent,
     ArticleComponent,
     FsmComponent,
@@ -40,7 +38,6 @@ import { FsmComponent } from './fsm/fsm.component';
         { path: 'home', component: HomeComponent },
         { path: 'list', component: ListComponent },
         { path: 'gsp', component: GspComponent },
-        { path: 'tag', component: TagComponent },
         { path: 'fsm', component: FsmComponent },
         //{ path: 'article', redirectTo: '/list', pathMatch: "full" },
         { path: 'article/:name', component: ArticleComponent },

@@ -1,11 +1,14 @@
 <div class="list-component">
+
+    <ng-container *ngFor="let tag of tagList; let i = index">
+        <d-tag [mode]="'checkable'" [(checked)]="tag.checked" [tag]="tag.name" [labelStyle]="tag.type"
+            [style.zoom]="getZoom(tag.num.length)" (checkedChange)="changeChecked(tag)">
+        </d-tag>
+    </ng-container>
+
     <div class="list">
         <div *ngFor="let item of listArray" class="list-item">
-            <d-card style="width: 350px">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 16px">
-                    <!--<d-avatar style="vertical-align: middle" [imgSrc]="imgSrc" [width]="48" [height]="48"></d-avatar>-->
-                    <div style="font-size: 20px; cursor: pointer" class="icon-star-o"></div>
-                </div>
+            <d-card class="list-item" *ngIf="item.show===true">
                 <d-card-header>
                     <d-card-title>
                         <a routerLink="/article/{{item.title}}" routerLinkActive="active">
@@ -14,6 +17,9 @@
                     </d-card-title>
                     <d-card-subtitle><i class="icon-company-member card-icon"></i><span>dashuai</span></d-card-subtitle>
                 </d-card-header>
+                <d-card-content>
+                    {{item.tags}}
+                </d-card-content>
                 <d-card-actions [align]="'spaceBetween'">
                     <div class="action-text">更新于{{item.date}}</div>
                     <div>
