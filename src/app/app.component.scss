@@ -1,11 +1,6 @@
 @import "~ng-devui/styles-var/devui-var.scss";
 @import "~ng-devui/style/core/font";
 
-.outlet {
-    position: relative;
-    display: block;
-    margin-top: 50px;
-}
 @mixin menu() {
     position: fixed;
     display: block;
@@ -61,15 +56,20 @@
     display: flex; //将对象作为弹性伸缩盒显示。（伸缩盒最新版本）（CSS3）
     flex-direction: column; //纵向从上往下排列（顶对齐）。
     transform: none; //无变换
-
+    height: 100%;
     .app-bar {
-        position: fixed; //fixed：与absolute一致，但偏移定位是以窗口为参考。当出现滚动条时，对象不会随着滚动。
+        position: fixed; //fixed：与absolute一致，但偏移定位是以窗口为参考。
+        //当出现滚动条时，对象不会随着滚动。
         top: 0;
         left: 0;
         right: 0;
         z-index: 10; //用于确定元素在当前层叠上下文中的层叠级别，并确定该元素是否创建新的局部层叠上下文。
     }
-
+    .app-content {
+        height: 100%;
+        display: block; //此元素将显示为块级元素，此元素前后会带有换行符。
+        margin-top: 50px;
+    }
     a.main-nav-item {
         //设置或检索在对象上移动的鼠标指针采用何种系统预定义的光标形状。
         cursor: pointer;

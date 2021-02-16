@@ -1,8 +1,18 @@
 @import "~ng-devui/styles-var/devui-var.scss";
 @import "~ng-devui/style/core/font";
 
-.home-component{
+.home-component {
     color: $devui-text;
-    background-color: $devui-base-bg;   
-    margin:0px 10% auto;
+    background-color: $devui-base-bg;
+    margin: 0px 10% 30px;
+}
+.app-footer {
+    text-align: center;
+    padding: 3px;
+    color: rgb(0, 0, 0);
+    position: fixed;
+    bottom: 0;
+    height: 25px;
+    width: 100%;
+    background-color: #d6fff6;
 }

@@ -6,7 +6,10 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-
+  imageArray = ["homePicture/background1.jpg"];
+  height = '500px';
+  autoplay = true;
+  autoplaySpeed = '3000';
   constructor() { }
 
   ngOnInit(): void {
