@@ -883,7 +883,7 @@ function output(text: string): void {
     element.value = text;
 }
 
-function saveAsPNG() {
+export function saveAsPNG() {
     let oldSelectedObject = selectedObject;
     selectedObject = null;
     drawUsing(canvas.getContext('2d'));
@@ -892,37 +892,39 @@ function saveAsPNG() {
     document.location.href = pngData;
 }
 
-function saveAsSVG() {
+export function saveAsSVG() {
     let exporter = new ExportAsSVG();
     let oldSelectedObject = selectedObject;
     selectedObject = null;
     drawUsing(exporter);
     selectedObject = oldSelectedObject;
     let svgData = exporter.toSVG();
-    output(svgData);
+    return svgData;
+    //output(svgData);
     // Chrome isn't ready for this yet, the 'Save As' menu item is disabled
     // document.location.href = 'data:image/svg+xml;base64,' + btoa(svgData);
 }
 
-function saveAsLaTeX() {
+export function saveAsLaTeX() {
     let exporter = new ExportAsLaTeX();
     let oldSelectedObject = selectedObject;
     selectedObject = null;
     drawUsing(exporter);
     selectedObject = oldSelectedObject;
     let texData = exporter.toLaTeX();
+    return texData;
     output(texData);
 }
 
 
 
 // draw using this instead of a canvas and call toLaTeX() afterward
-function ExportAsLaTeX() {
-    this._points = [];
-    this._texData = '';
-    this._scale = 0.1; // to convert pixels to document space (TikZ breaks if the numbers get too big, above 500?)
+class ExportAsLaTeX {
+    _points = [];
+    _texData = '';
+    _scale = 0.1; // to convert pixels to document space (TikZ breaks if the numbers get too big, above 500?)
 
-    this.toLaTeX = function () {
+    toLaTeX() {
         return '\\documentclass[12pt]{article}\n' +
             '\\usepackage{tikz}\n' +
             '\n' +
@@ -938,10 +940,10 @@ function ExportAsLaTeX() {
             '\\end{document}\n';
     };
 
-    this.beginPath = function () {
+    beginPath = function () {
         this._points = [];
     };
-    this.arc = function (x, y, radius, startAngle, endAngle, isReversed) {
+    arc = function (x, y, radius, startAngle, endAngle, isReversed) {
         x *= this._scale;
         y *= this._scale;
         radius *= this._scale;
@@ -969,12 +971,18 @@ function ExportAsLaTeX() {
             this._texData += '\\draw [' + this.strokeStyle + '] (' + fixed(x + radius * Math.cos(startAngle), 3) + ',' + fixed(-y + radius * Math.sin(startAngle), 3) + ') arc (' + fixed(startAngle * 180 / Math.PI, 5) + ':' + fixed(endAngle * 180 / Math.PI, 5) + ':' + fixed(radius, 3) + ');\n';
         }
     };
-    this.moveTo = this.lineTo = function (x, y) {
+    moveTo(x, y) {
         x *= this._scale;
         y *= this._scale;
         this._points.push({ 'x': x, 'y': y });
     };
-    this.stroke = function () {
+    lineTo(x, y) {
+        x *= this._scale;
+        y *= this._scale;
+        this._points.push({ 'x': x, 'y': y });
+
+    };
+    stroke = function () {
         if (this._points.length == 0) return;
         this._texData += '\\draw [' + this.strokeStyle + ']';
         for (let i = 0; i < this._points.length; i++) {
@@ -983,7 +991,7 @@ function ExportAsLaTeX() {
         }
         this._texData += ';\n';
     };
-    this.fill = function () {
+    fill = function () {
         if (this._points.length == 0) return;
         this._texData += '\\fill [' + this.strokeStyle + ']';
         for (let i = 0; i < this._points.length; i++) {
@@ -992,12 +1000,12 @@ function ExportAsLaTeX() {
         }
         this._texData += ';\n';
     };
-    this.measureText = function (text) {
+    measureText = function (text) {
         let c = canvas.getContext('2d');
         c.font = '20px "Times New Romain", serif';
         return c.measureText(text);
     };
-    this.advancedFillText = function (text, originalText, x, y, angleOrNull) {
+    advancedFillText = function (text, originalText, x, y, angleOrNull) {
         if (text.replace(' ', '').length > 0) {
             let nodeParams = '';
             // x and y start off as the center of the text, but will be moved to one side of the box when angleOrNull != null
@@ -1019,7 +1027,10 @@ function ExportAsLaTeX() {
         }
     };
 
-    this.translate = this.save = this.restore = this.clearRect = function () { };
+    translate() { }
+    save() { }
+    restore() { }
+    clearRect() { }
 }
 
 // draw using this instead of a canvas and call toSVG() afterward

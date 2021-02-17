@@ -6,10 +6,10 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  imageArray = ["homePicture/background1.jpg"];
+  imageArray = ["homePicture/background1.jpg", "homePicture/b4.jpg"];
   height = '500px';
   autoplay = true;
-  autoplaySpeed = '3000';
+  autoplaySpeed = '10000';
   constructor() { }
 
   ngOnInit(): void {

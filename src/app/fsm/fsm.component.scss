@@ -1,10 +1,12 @@
 .fsm {
     text-align: center;
     background: #dfdfdf;
-    margin: 50px 30px 100px 30px;
+    margin: 0px 0px 0px 0px;
+
     font: 14px/18px "Lucida Grande", "Segoe UI", sans-serif;
 
     h1 {
+        margin-top: 0;
         font: bold italic 50px Georgia, serif;
     }
 
@@ -19,6 +21,7 @@
 
     a {
         color: black;
+        text-decoration-line: underline;
     }
 
     div {
@@ -36,7 +39,7 @@
     }
 
     p {
-        margin: 30px 0;
+        margin: 30px 0 0px;
         line-height: 20px;
     }
 
@@ -44,10 +47,13 @@
         text-align: center;
     }
 
-    textarea {
-        display: none;
+    #output {
         width: 75%;
-        height: 400px;
         margin: 0 auto;
+    }
+    textarea {
+        width: 75%;
+        margin: 0 10%;
+        height: 500px;
     }
 }

@@ -9,11 +9,20 @@ import * as fsm from './myFSM';
 })
 
 export class FsmComponent implements OnInit {
+  output: string = "";
 
   constructor() { }
 
   ngOnInit(): void {
     fsm.onLoad();
+  }
+
+  saveAsSVG() {
+    this.output = fsm.saveAsSVG();
+  }
+  saveAsLaTeX() {
+    this.output = fsm.saveAsLaTeX();
+    console.log(this.output)
   }
 
 }

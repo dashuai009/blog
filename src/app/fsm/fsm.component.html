@@ -4,9 +4,12 @@
         <span class="error">Your browser does not support<br>the HTML5 &lt;canvas&gt; element</span>
     </canvas>
     <div>
-        <p class="center">Export as: <a href="javascript:saveAsPNG()">PNG</a> | <a href="javascript:saveAsSVG()">SVG</a>
-            | <a href="javascript:saveAsLaTeX()">LaTeX</a></p>
-        <textarea id="output"></textarea>
+        <div class="center">Export as:
+            <d-button style="margin-right: 20px" bsStyle="text">PNG</d-button>|
+            <d-button style="margin-right: 20px" bsStyle="text" (btnClick)="saveAsSVG()">SVG</d-button> |
+            <d-button style="margin-right: 20px" bsStyle="text" (btnClick)="saveAsLaTeX()">SVG</d-button>
+        </div>
+        <textarea *ngIf="output!==''">{{output}}</textarea>
         <p>The big white box above is the FSM designer.&nbsp; Here's how to use it:</p>
         <ul>
             <li><b>Add a state:</b> double-click on the canvas</li>
@@ -22,5 +25,4 @@
         <p>This was made in HTML5 and JavaScript using the canvas element.</p>
     </div>
     <p>Created by <a href="http://madebyevan.com/">Evan Wallace</a> in 2010</p>
-
 </div>

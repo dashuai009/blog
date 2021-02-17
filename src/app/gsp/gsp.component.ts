@@ -12,8 +12,8 @@ export class GspComponent implements OnInit {
   ngOnInit(): void {
     var params = {
       "appName": "geometry",
-      "width": 1000,
-      "height": 500,
+      "width": 900,
+      "height": 530,
       "showToolBar": true,
       "showAlgebraInput": true,
       "showMenuBar": true
