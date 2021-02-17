@@ -7,7 +7,7 @@
         <div class="center">Export as:
             <d-button style="margin-right: 20px" bsStyle="text">PNG</d-button>|
             <d-button style="margin-right: 20px" bsStyle="text" (btnClick)="saveAsSVG()">SVG</d-button> |
-            <d-button style="margin-right: 20px" bsStyle="text" (btnClick)="saveAsLaTeX()">SVG</d-button>
+            <d-button style="margin-right: 20px" bsStyle="text" (btnClick)="saveAsLaTeX()">LaTeX</d-button>
         </div>
         <textarea *ngIf="output!==''">{{output}}</textarea>
         <p>The big white box above is the FSM designer.&nbsp; Here's how to use it:</p>

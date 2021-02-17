@@ -1,6 +1,8 @@
-title: 2020ccpc-Weihai威海-D-ABC_Conjecture
-date: 2021-01-11 23:58:05
-tags: 数论
+{
+    "title": "2020ccpc-Weihai威海-D-ABC_Conjecture",
+    "date": "2021-01-11 23:58:05",
+    "tags": ["数论"]
+}
 ....------....-
 
 ## [链接](https://codeforces.com/gym/102798/problem/D)

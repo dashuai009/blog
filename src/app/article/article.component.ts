@@ -8,7 +8,20 @@ import * as md from 'markdown-it';
 import * as hljs from 'highlight.js';
 import * as latex from 'markdown-it-katex';
 import * as cheerio from 'cheerio';
+import { TagComponent } from 'ng-devui';
 
+
+interface tag {
+  checked: boolean;
+  type: string;
+  name: string;
+};
+
+interface articleLink {
+  title: string,
+  tags: string[],
+  date: string,
+}
 
 const latexOptions = {
   inlineOpen: '$',
@@ -25,7 +38,10 @@ const latexOptions = {
 
 export class ArticleComponent implements OnInit {
   result = md().render('# what are you 弄啥勒？');
+  tagList: tag[] = new Array();
+  tagColor: string[] = ['blue-w98', 'aqua-w98', 'olivine-w98', 'green-w98', 'yellow-w98', 'orange-w98', 'pink-w98', 'red-w98', 'purple-w98'];
 
+  headerJson: articleLink;
   constructor(
     private sanitizer: DomSanitizer, private myServer: ServerService, private route: ActivatedRoute) { }
 
@@ -33,9 +49,21 @@ export class ArticleComponent implements OnInit {
     const articleName = this.route.snapshot.paramMap.get('name');
     console.log(articleName);
     this.myServer.getArticle(articleName).subscribe(res => {
-      console.log(res);
       let header = res.split("....------....-")[0];
       let articleBody = res.slice(header.length + 14);
+      let headerTmp = JSON.parse(header);
+      this.headerJson = headerTmp;
+
+      console.log(this.headerJson);
+      for (let i in this.headerJson.tags) {
+        this.tagList.push({
+          checked: false,
+          name: this.headerJson.tags[i],
+          type: this.tagColor[Math.floor(Math.random() * 9.99)],
+        })
+
+      }
+
 
       //"good_luck_buddy".split(/_(.+)/)[1]
       //"luck_buddy"

@@ -1,7 +1,7 @@
 {
     "title": "test.md",
     "date": "2021-01-05 23:01:53",
-    "tags": "latex"
+    "tags": ["latex"]
 }
 ....------....-
 $a$

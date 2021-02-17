@@ -1,9 +1,16 @@
 <div class="article">
     <div class="bar">
-        <p>article works!</p>
-        <p>article works!</p>
+        <div class="tags">
+            <ng-container *ngFor="let tag of tagList; let i = index">
+                <d-tag [mode]="'checkable'" [(checked)]="tag.checked" [tag]="tag.name" [labelStyle]="tag.type">
+                </d-tag>
+            </ng-container>
+        </div>
+
+        <h2 class="title">{{headerJson.title}}</h2>
+        <div>{{headerJson.date}}</div>
     </div>
-    
+
     <div [innerHtml]="result" class="main-item"></div>
 
     <d-back-top [customTemplate]="customTemplate" [bottom]="'100px'">
