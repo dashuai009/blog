@@ -1,5 +1,5 @@
 {
-    "title": "2020ccpc-Weihai威海-D-ABC_Conjecture.md",
+    "title": "2020ccpc_Weihai_D_ABC_Conjecture.md",
     "date": "2021-01-11 23:58:05",
     "tags": ["数论"]
 }
