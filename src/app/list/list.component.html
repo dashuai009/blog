@@ -1,11 +1,11 @@
 <div class="list-component">
-
-    <ng-container *ngFor="let tag of tagList; let i = index">
-        <d-tag [mode]="'checkable'" [(checked)]="tag.checked" [tag]="tag.name" [labelStyle]="tag.type"
-            [style.zoom]="getZoom(tag.num.length)" (checkedChange)="changeChecked(tag)">
-        </d-tag>
-    </ng-container>
-
+    <div class="list-tag">
+        <ng-container *ngFor="let tag of tagList; let i = index">
+            <d-tag [mode]="'checkable'" [(checked)]="tag.checked" [tag]="tag.name" [labelStyle]="tag.type"
+                [style.zoom]="getZoom(tag.num.length)" (checkedChange)="changeChecked(tag)">
+            </d-tag>
+        </ng-container>
+    </div>
     <div class="list">
         <div *ngFor="let item of listArray" class="list-item">
             <d-card class="list-item" *ngIf="item.show===true">

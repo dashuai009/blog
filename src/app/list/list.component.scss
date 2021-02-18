@@ -4,22 +4,30 @@
 .list-component {
   color: $devui-text;
   background-color: $devui-base-bg;
-  //margin: 5px 10% 30px;
 
   d-tag {
     margin: 4px;
     zoom: 1.5;
   }
+  .list-tag {
+    display: inline-block;
+    margin: 10px 20px 10px;
+    width: 100%;
+    background: linear-gradient(to right, rgb(222, 255, 130), rgb(160, 255, 247));
+    padding: 14px;
+    border-left: 6px solid #ccc !important;
+    border-color: #2196f3 !important;
+  }
   .list {
-    display: block;
     .list-item {
-      margin: 10px 10px 10px 10px;
-      width: 400px;
+      display: inline-block;
+      margin: 10px 6px 10px;
+      //float: left;
     }
   }
 }
 d-card {
-  width: 350px;
+  width: 330px;
   a {
     color: black;
     background: linear-gradient(to right, rgb(222, 255, 130), rgb(160, 255, 247));
