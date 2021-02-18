@@ -41,18 +41,20 @@ export class ArticleComponent implements OnInit {
   tagList: tag[] = new Array();
   tagColor: string[] = ['blue-w98', 'aqua-w98', 'olivine-w98', 'green-w98', 'yellow-w98', 'orange-w98', 'pink-w98', 'red-w98', 'purple-w98'];
 
-  headerJson: articleLink;
+  headerJson: articleLink = { title: "what", tags: ["???"], date: "long long time ago" };
   constructor(
     private sanitizer: DomSanitizer, private myServer: ServerService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
     const articleName = this.route.snapshot.paramMap.get('name');
-    console.log(articleName);
-    this.myServer.getArticle(articleName).subscribe(res => {
+    this.myServer.getArticle(articleName + '.md').subscribe(res => {
+      console.log(res);
       let header = res.split("....------....-")[0];
+      console.log(header);
       let articleBody = res.slice(header.length + 14);
       let headerTmp = JSON.parse(header);
       this.headerJson = headerTmp;
+      console.log(headerTmp);
 
       console.log(this.headerJson);
       for (let i in this.headerJson.tags) {

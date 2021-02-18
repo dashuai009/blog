@@ -10,6 +10,10 @@ for file in list_dir:
         f = open(file)
         lines = f.read()
         lines = lines.split("....------....-")
+        # print(lines[0])
+        tmp = json.loads(lines[0])
+        if(tmp['title']+".md" != file):
+            print(tmp["title"], "文档title命名错误！")
         list_item.append(lines[0])
         f.close()
 

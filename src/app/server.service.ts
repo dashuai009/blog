@@ -8,7 +8,7 @@ const myOptions = {
   headers: new HttpHeaders({
     'Content-Type': 'application/json',
   }),
-  responseType: 'text' as 'json'
+  responseType: 'text' as const
 };
 export const api = "http://106.14.58.177";
 
@@ -55,7 +55,7 @@ export class ServerService {
 
   getArticle(name: string): Observable<string> {
     console.log(name);
-    return this.myConnect.get<string>(api + '/' + name, myOptions)
+    return this.myConnect.get(api + '/' + name, { responseType: 'text' as const })
       .pipe(
         retry(3),
       )
