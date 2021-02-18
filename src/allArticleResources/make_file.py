@@ -8,7 +8,7 @@ tags = ",".join('"'+i+'"' for i in sys.argv[2:])
 
 f.write("{\n")
 f.write('\t"title":\"'+title+'\",\n')
-f.write('\t"data":\"'+now+'\",\n')
+f.write('\t"date":\"'+now+'\",\n')
 f.write('\t"tags":['+tags+']\n')
 f.write('}\n....------....-')
 f.close()
