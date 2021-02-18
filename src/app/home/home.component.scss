@@ -4,7 +4,7 @@
 .home-component {
     color: $devui-text;
     background-color: $devui-base-bg;
-    margin: 0px 10% 30px;
+    height: 100%;
 }
 .app-footer {
     text-align: center;
@@ -15,4 +15,9 @@
     height: 25px;
     width: 100%;
     background-color: #d6fff6;
+}
+textarea {
+    width: 75%;
+    margin: 0 10%;
+    height: 500px;
 }

@@ -48,15 +48,15 @@ export class ArticleComponent implements OnInit {
   ngOnInit(): void {
     const articleName = this.route.snapshot.paramMap.get('name');
     this.myServer.getArticle(articleName + '.md').subscribe(res => {
-      console.log(res);
+      //console.log(res);
       let header = res.split("....------....-")[0];
-      console.log(header);
+      //console.log(header);
       let articleBody = res.slice(header.length + 14);
       let headerTmp = JSON.parse(header);
       this.headerJson = headerTmp;
-      console.log(headerTmp);
+      //console.log(headerTmp);
 
-      console.log(this.headerJson);
+      ///console.log(this.headerJson);
       for (let i in this.headerJson.tags) {
         this.tagList.push({
           checked: false,
