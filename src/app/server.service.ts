@@ -10,7 +10,7 @@ const myOptions = {
   }),
   responseType: 'text' as const
 };
-export const api = "http://106.14.58.177";
+export const api = "http://dashuai009.icu";
 
 export interface articleLink {
   title: string,
