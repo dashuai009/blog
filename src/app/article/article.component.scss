@@ -6,14 +6,18 @@
   background-color: $devui-base-bg;
 
   .bar {
-    height: 30px;
+    height: 40px;
     width: 80%;
-    margin: 0px 10% auto;
+    margin: 0px 10% 10px;
+
+    font-size: 20px;
+    padding-top: 10px;
     display: flex;
     flex-direction: row;
     align-items: center;
     .tags {
       justify-content: left;
+      zoom: 1.5;
     }
     .title {
       margin: 0 auto;
@@ -21,9 +25,12 @@
     }
   }
   .main-item {
+    font-size: 18px;
     width: 80%;
-    margin: 0 10% auto;
-    padding: 0 10px 0 10px;
+    margin: 5px 10% 10px;
+    padding: 10px 20px 25px 20px;
+    border: 1px solid $devui-brand;
+    border-radius: 16px !important;
     box-shadow: 0 2px 4px 4px $devui-shadow; //定义元素的阴影。
   }
   .devui-backtop-custom {
