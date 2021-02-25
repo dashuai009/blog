@@ -28,7 +28,7 @@ export class ListComponent implements OnInit {
     this.myServer.showList().subscribe(res => {
       for (let i in res) {
         let item = res[i];
-        res[i].show = true;//起先每一个都要展示
+        res[i].show = 1;//起先每一个都要展示
         for (let j in item.tags) {
           if (this.tagMap.has(item.tags[j])) {
             this.tagMap.get(item.tags[j]).push(i);
@@ -53,18 +53,15 @@ export class ListComponent implements OnInit {
   }
   changeChecked(tagItem: tag) {
     if (this.firstChangeChecked) {
-      for (let i in this.tagList) {
-        let item = this.tagList[i];
-        for (let j in item.num) {
-          this.listArray[item.num[j]].show = item.checked;
-        }
+      for (let i in this.listArray) {
+        this.listArray[i].show = 0;
       }
       this.firstChangeChecked = false;
-    } else {
-      for (let j in tagItem.num) {
-        this.listArray[tagItem.num[j]].show = tagItem.checked;
-      }
     }
+    for (let j in tagItem.num) {
+      this.listArray[tagItem.num[j]].show += (tagItem.checked ? 1 : -1);
+    }
+
   }
   getZoom(cnt) {
     if (cnt > 10) {

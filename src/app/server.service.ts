@@ -16,7 +16,7 @@ export interface articleLink {
   title: string,
   tags: string[],
   date: string,
-  show: boolean;
+  show: number;
 }
 
 export interface articleData {

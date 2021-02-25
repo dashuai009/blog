@@ -1,5 +1,6 @@
-@import "~ng-devui/styles-var/devui-var.scss";
+@import "~ng-devui/style/theme/color";
 @import "~ng-devui/style/core/font";
+@import "~ng-devui/style/theme/shadow";
 
 @mixin menu() {
     position: fixed;
@@ -357,7 +358,8 @@
     border-right: 2px solid $devui-brand;
 
     a {
-        color: inherit;
+        color: $devui-brand-active;
+        font-weight: 700;
     }
 }
 
