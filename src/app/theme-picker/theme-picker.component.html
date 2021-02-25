@@ -57,9 +57,8 @@
                     <div *ngFor="let item of advancedThemeList" class="extend-theme-image"
                         [style.background-image]="'url('+ item.url + ')'" (click)="advancedThemeChange(item.value)">
                         <span class="extend-theme-title"
-                            [style.color]="item.value === 'infinity' ? 'var(--devui-text)' : null">{{
-                            'themePicker.' + item.value
-                            }}</span>
+                            [style.color]="item.value === 'infinity' ? 'var(--devui-text)' : null">
+                            {{item.value}}</span>
                         <i *ngIf="currentAdvancedTheme === item.value" class="icon-right active-theme"></i>
                     </div>
                 </ng-template>
