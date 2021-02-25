@@ -55,8 +55,7 @@
             <d-tab id="advancedTheme" title="扩展主题" tabId="advancedTheme">
                 <ng-template dTabContent>
                     <div *ngFor="let item of advancedThemeList" class="extend-theme-image"
-                        [style.background-image]="'url(' + assetsPrefix + item.url + ')'"
-                        (click)="advancedThemeChange(item.value)">
+                        [style.background-image]="'url('+ item.url + ')'" (click)="advancedThemeChange(item.value)">
                         <span class="extend-theme-title"
                             [style.color]="item.value === 'infinity' ? 'var(--devui-text)' : null">{{
                             'themePicker.' + item.value
