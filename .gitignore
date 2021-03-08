@@ -48,7 +48,3 @@ Thumbs.db
 
 /src/allArticleResources/list.json
 /src/allArticleResources/error.log
-
-/src/allArticleResources/*
-!/src/allArticleResources/assets
-!/src/allArticleResources/homePicture
