@@ -11,6 +11,7 @@ import {
   $isHorizontalRuleNode,
   HorizontalRuleNode
 } from "@lexical/react/LexicalHorizontalRuleNode";
+import {EQUATION} from "@/lexical-playground/src/plugins/MarkdownTransformers";
 
 export const HR: ElementTransformer = {
   dependencies: [HorizontalRuleNode],
@@ -35,6 +36,7 @@ export const HR: ElementTransformer = {
 
 export const PLAYGROUND_TRANSFORMERS: Array<Transformer> = [
   HR,
+  EQUATION,
   ...ELEMENT_TRANSFORMERS,
   ...TEXT_FORMAT_TRANSFORMERS,
   ...TEXT_MATCH_TRANSFORMERS

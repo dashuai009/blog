@@ -4,6 +4,7 @@ import { $createHeadingNode, $createQuoteNode } from "@lexical/rich-text";
 import { $createLinkNode } from "@lexical/link";
 
 export default function prepopulatedText() {
+  return;
   const root = $getRoot();
 
   const heading = $createHeadingNode("h1");

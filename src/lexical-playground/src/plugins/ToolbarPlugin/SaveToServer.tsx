@@ -12,7 +12,7 @@ import {
 
 
 async function SendText(token: any, id: any, text: string) {
-    console.log("editor text = ", text);
+    // console.log("editor text = ", text);
     const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/save/text`, {
         method: 'POST',
         headers: {
@@ -43,23 +43,23 @@ export default function SaveToServer({textType }: any): JSX.Element {
     const saveToServer = async () => {
         if (!token) return;
         const editorState = editor.getEditorState();
-        if( textType == TextType.LEXICAL_RICHTEXT){
+        // if( textType == TextType.LEXICAL_RICHTEXT){
             let text = "";
             text = JSON.stringify(editorState);
-            SendText(token, id, text);
-        } else if (textType == TextType.MARKDOWN){
-            editor.update(()=>{
-                let text = "";
-                const root = $getRoot();
-                const firstChild = root.getFirstChild();
-                if ($isCodeNode(firstChild) && firstChild.getLanguage() === "markdown") {
-                    text = firstChild.getTextContent();
-                } else {
-                    text = $convertToMarkdownString(PLAYGROUND_TRANSFORMERS);
-                }
-                SendText(token, id, text);
-            })
-        }
+            await SendText(token, id, text);
+        // } else if (textType == TextType.MARKDOWN){
+        //     editor.update(()=>{
+        //         let text = "";
+        //         const root = $getRoot();
+        //         const firstChild = root.getFirstChild();
+        //         if ($isCodeNode(firstChild) && firstChild.getLanguage() === "markdown") {
+        //             text = firstChild.getTextContent();
+        //         } else {
+        //             text = $convertToMarkdownString(PLAYGROUND_TRANSFORMERS);
+        //         }
+        //         SendText(token, id, text);
+        //     })
+        // }
     }
     return <button onClick={saveToServer}> save </button>
 }

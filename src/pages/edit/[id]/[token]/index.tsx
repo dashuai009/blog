@@ -31,7 +31,7 @@ export default function PostPage({status, msg, blog}: PropsInterface) {
             <>
                 <h1>title: {blog!.title}</h1>
                 <h1>type: {blog!.text_type}</h1>
-                <MarkdownOnlyEditor/>
+                <MarkdownOnlyEditor markdownText={blog!.text}/>
             </>
         )
     } else {

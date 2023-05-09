@@ -4,11 +4,6 @@ import {AppDataSource} from "@/pages/api/data-source";
 import {BlogController} from "@/pages/api/blog-controller";
 import {PropsInterface} from "@/pages/api/blog-interface";
 import {Blog} from "@/pages/api/blog";
-import {CreateInitialConfig} from "@/lexical-playground/src/BlogEditor";
-import {$generateHtmlFromNodes} from "@lexical/html";
-import {createHeadlessEditor} from '@lexical/headless';
-import {JSDOM} from "jsdom";
-import {type} from "os";
 
 export default async function handler(
     req: NextApiRequest,

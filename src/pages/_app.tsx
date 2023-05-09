@@ -1,6 +1,7 @@
 import '@/styles/globals.css'
 
 import '@/lexical-playground/src/index.css'
+import '@/lexical-playground/src/ui/Button.css'
 import '@/lexical-playground/src/ui/Dialog.css'
 import '@/lexical-playground/src/ui/EquationEditor.css'
 import '@/lexical-playground/src/ui/ContentEditable.css'

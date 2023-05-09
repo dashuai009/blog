@@ -12,12 +12,19 @@ import {AutoLinkNode, LinkNode} from "@lexical/link";
 import {LinkPlugin} from "@lexical/react/LexicalLinkPlugin";
 import {ListPlugin} from "@lexical/react/LexicalListPlugin";
 import {MarkdownShortcutPlugin} from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import {TRANSFORMERS} from "@lexical/markdown";
+import {$convertFromMarkdownString} from "@lexical/markdown";
 
 import ActionsPlugin from "./plugins/ActionsPlugin";
 import CodeHighlightPlugin from "./plugins/CodeHighlightPlugin";
-import prepopulatedText from "./SampleText.js";
+// import prepopulatedText from "./SampleText";
 import {CreateEditorArgs} from "lexical/LexicalEditor";
+import {useEffect} from "react";
+import {useLexicalComposerContext} from "@lexical/react/LexicalComposerContext";
+import {PLAYGROUND_TRANSFORMERS} from "@/markdown-only/plugins/MarkdownTransformers";
+import {EquationNode} from "@/lexical-playground/src/nodes/EquationNode";
+import EquationsPlugin from "@/lexical-playground/src/plugins/EquationsPlugin";
+import {HorizontalRuleNode} from "@lexical/react/LexicalHorizontalRuleNode";
+import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 
 function Placeholder() {
     return (
@@ -26,29 +33,29 @@ function Placeholder() {
         </div>
     );
 }
-
-const editorConfig: any = {
-    editorState: prepopulatedText,
-    theme: ExampleTheme,
-    // Handling of errors during update
-    onError(error: any) {
-        throw error;
-    },
-    // Any custom nodes go here
-    nodes: [
-        HeadingNode,
-        ListNode,
-        ListItemNode,
-        QuoteNode,
-        CodeNode,
-        CodeHighlightNode,
-        TableNode,
-        TableCellNode,
-        TableRowNode,
-        AutoLinkNode,
-        LinkNode
-    ]
-};
+//
+// const editorConfig: any = {
+//     editorState: prepopulatedText,
+//     theme: ExampleTheme,
+//     // Handling of errors during update
+//     onError(error: any) {
+//         throw error;
+//     },
+//     // Any custom nodes go here
+//     nodes: [
+//         HeadingNode,
+//         ListNode,
+//         ListItemNode,
+//         QuoteNode,
+//         CodeNode,
+//         CodeHighlightNode,
+//         TableNode,
+//         TableCellNode,
+//         TableRowNode,
+//         AutoLinkNode,
+//         LinkNode
+//     ]
+// };
 
 export function CreateMarkdownOnlyInitialConfig(contentJson: string): CreateEditorArgs {
     return {
@@ -66,7 +73,9 @@ export function CreateMarkdownOnlyInitialConfig(contentJson: string): CreateEdit
             TableCellNode,
             TableRowNode,
             AutoLinkNode,
-            LinkNode
+            LinkNode,
+            EquationNode,
+            HorizontalRuleNode
         ],
         onError: (error: Error) => {
             throw error;
@@ -74,10 +83,20 @@ export function CreateMarkdownOnlyInitialConfig(contentJson: string): CreateEdit
         theme: ExampleTheme,
     }
 }
-
-export default function MarkdownOnlyEditor() {
+function Init({text}: any){
+    const [editor] = useLexicalComposerContext();
+    useEffect(()=>{
+        editor.update(()=>{
+            $convertFromMarkdownString(text, PLAYGROUND_TRANSFORMERS);
+        })
+    })
+    return (<></>)
+}
+export default function MarkdownOnlyEditor({markdownText}: any) {
+    let editorConfig = CreateMarkdownOnlyInitialConfig(markdownText);
+    editorConfig.editable = true;
     return (
-        <LexicalComposer initialConfig={editorConfig}>
+        <LexicalComposer initialConfig={editorConfig as any}>
             <div className="editor-shell">
                 <ToolbarPlugin/>
                 <div className="editor-container">
@@ -85,14 +104,17 @@ export default function MarkdownOnlyEditor() {
                     <RichTextPlugin
                         contentEditable={<ContentEditable className="ContentEditable__root"/>}
                         placeholder={<Placeholder/>}
+                        ErrorBoundary={LexicalErrorBoundary}
                     />
                     <AutoFocusPlugin/>
                     <ListPlugin/>
                     <LinkPlugin/>
-                    <MarkdownShortcutPlugin transformers={TRANSFORMERS}/>
+                    <EquationsPlugin/>
+                    <MarkdownShortcutPlugin transformers={PLAYGROUND_TRANSFORMERS}/>
                     <CodeHighlightPlugin/>
                 </div>
                 <ActionsPlugin/>
+                {/*<Init text={markdownText}></Init>*/}
             </div>
         </LexicalComposer>
     );

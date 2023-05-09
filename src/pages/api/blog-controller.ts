@@ -11,7 +11,7 @@ export class BlogController {
     // }
 
     async get_page_by_id(request: NextApiRequest, response: NextApiResponse) {
-        console.log("get_page_by_id", request.query)
+        // console.log("get_page_by_id", request.query)
         const page_id = parseInt(<string>request.query.id!)
 
         const user = await this.blogRepository.findOne({
@@ -25,7 +25,7 @@ export class BlogController {
         return user
     }
     create_new(request: NextApiRequest, response: NextApiResponse){
-        console.log("create_new", request.body);
+        // console.log("create_new", request.body);
         const {page_info} = request.body;
         const insert_data = new Blog();
         insert_data.likes = 0;

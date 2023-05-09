@@ -32,6 +32,10 @@ import {
 } from "@lexical/code";
 import SaveToServer from "@/lexical-playground/src/plugins/ToolbarPlugin/SaveToServer";
 import {TextType} from "@/pages/api/blog-interface";
+import * as React from 'react';
+import {InsertEquationDialog} from "@/lexical-playground/src/plugins/EquationsPlugin";
+import useModal from "@/lexical-playground/src/hooks/useModal";
+import Button from "@mui/material/Button";
 
 const LowPriority = 1;
 
@@ -45,7 +49,7 @@ const supportedBlockTypes = new Set([
   "ol"
 ]);
 
-const blockTypeToBlockName = {
+const blockTypeToBlockName: any = {
   code: "Code Block",
   h1: "Large Heading",
   h2: "Small Heading",
@@ -62,6 +66,7 @@ function Divider() {
   return <div className="divider" />;
 }
 
+// @ts-ignore
 function positionEditorElement(editor, rect) {
   if (rect === null) {
     editor.style.opacity = "0";
@@ -76,9 +81,10 @@ function positionEditorElement(editor, rect) {
   }
 }
 
+// @ts-ignore
 function FloatingLinkEditor({ editor }) {
   const editorRef = useRef(null);
-  const inputRef = useRef(null);
+  const inputRef = useRef(null as any);
   const mouseDownRef = useRef(false);
   const [linkUrl, setLinkUrl] = useState("");
   const [isEditMode, setEditMode] = useState(false);
@@ -108,13 +114,13 @@ function FloatingLinkEditor({ editor }) {
     const rootElement = editor.getRootElement();
     if (
       selection !== null &&
-      !nativeSelection.isCollapsed &&
+      !nativeSelection!.isCollapsed &&
       rootElement !== null &&
-      rootElement.contains(nativeSelection.anchorNode)
+      rootElement.contains(nativeSelection!.anchorNode)
     ) {
-      const domRange = nativeSelection.getRangeAt(0);
+      const domRange = nativeSelection!.getRangeAt(0);
       let rect;
-      if (nativeSelection.anchorNode === rootElement) {
+      if (nativeSelection!.anchorNode === rootElement) {
         let inner = rootElement;
         while (inner.firstElementChild != null) {
           inner = inner.firstElementChild;
@@ -127,7 +133,7 @@ function FloatingLinkEditor({ editor }) {
       if (!mouseDownRef.current) {
         positionEditorElement(editorElem, rect);
       }
-      setLastSelection(selection);
+      setLastSelection(selection as any);
     } else if (!activeElement || activeElement.className !== "link-input") {
       positionEditorElement(editorElem, null);
       setLastSelection(null);
@@ -140,7 +146,7 @@ function FloatingLinkEditor({ editor }) {
 
   useEffect(() => {
     return mergeRegister(
-      editor.registerUpdateListener(({ editorState }) => {
+      editor.registerUpdateListener(({ editorState }: any) => {
         editorState.read(() => {
           updateLinkEditor();
         });
@@ -216,11 +222,11 @@ function FloatingLinkEditor({ editor }) {
   );
 }
 
-function Select({ onChange, className, options, value }) {
+function Select({ onChange, className, options, value }: any) {
   return (
     <select className={className} onChange={onChange} value={value}>
       <option hidden={true} value="" />
-      {options.map((option) => (
+      {options.map((option: any) => (
         <option key={option} value={option}>
           {option}
         </option>
@@ -229,6 +235,7 @@ function Select({ onChange, className, options, value }) {
   );
 }
 
+// @ts-ignore
 function getSelectedNode(selection) {
   const anchor = selection.anchor;
   const focus = selection.focus;
@@ -250,8 +257,8 @@ function BlockOptionsDropdownList({
   blockType,
   toolbarRef,
   setShowBlockOptionsDropDown
-}) {
-  const dropDownRef = useRef(null);
+}: any) {
+  const dropDownRef = useRef(null as any);
 
   useEffect(() => {
     const toolbar = toolbarRef.current;
@@ -269,7 +276,7 @@ function BlockOptionsDropdownList({
     const toolbar = toolbarRef.current;
 
     if (dropDown !== null && toolbar !== null) {
-      const handle = (event) => {
+      const handle = (event: any) => {
         const target = event.target;
 
         if (!dropDown.contains(target) && !toolbar.contains(target)) {
@@ -410,6 +417,7 @@ function BlockOptionsDropdownList({
 
 export default function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
+  const [modal, showModal] = useModal();
   const toolbarRef = useRef(null);
   const [blockType, setBlockType] = useState("paragraph");
   const [selectedElementKey, setSelectedElementKey] = useState(null);
@@ -435,6 +443,7 @@ export default function ToolbarPlugin() {
       const elementKey = element.getKey();
       const elementDOM = editor.getElementByKey(elementKey);
       if (elementDOM !== null) {
+        // @ts-ignore
         setSelectedElementKey(elementKey);
         if ($isListNode(element)) {
           const parentList = $getNearestNodeOfType(anchorNode, ListNode);
@@ -488,7 +497,7 @@ export default function ToolbarPlugin() {
 
   const codeLanguges = useMemo(() => getCodeLanguages(), []);
   const onCodeLanguageSelect = useCallback(
-    (e) => {
+    (e: any) => {
       editor.update(() => {
         if (selectedElementKey !== null) {
           const node = $getNodeByKey(selectedElementKey);
@@ -509,6 +518,7 @@ export default function ToolbarPlugin() {
     }
   }, [editor, isLink]);
 
+  // @ts-ignore
   return (
     <div className="toolbar" ref={toolbarRef}>
       {supportedBlockTypes.has(blockType) && (
@@ -521,7 +531,7 @@ export default function ToolbarPlugin() {
             aria-label="Formatting Options"
           >
             <span className={"icon block-type " + blockType} />
-            <span className="text">{blockTypeToBlockName[blockType]}</span>
+            <span className="text">{blockTypeToBlockName[blockType as any] as any}</span>
             <i className="chevron-down" />
           </button>
           {showBlockOptionsDropDown &&
@@ -603,11 +613,26 @@ export default function ToolbarPlugin() {
           >
             <i className="format link" />
           </button>
+
+          <Button
+              onClick={() => {
+                showModal('Insert Equation', (onClose) => (
+                    <InsertEquationDialog
+                        activeEditor={editor}
+                        onClose={onClose}
+                    />
+                ));
+              }}
+              className="item">
+            <i className="icon equation" />
+            <span className="text">Equation</span>
+          </Button>
           {isLink &&
             createPortal(<FloatingLinkEditor editor={editor} />, document.body)}
         </>
       )}
       <SaveToServer textType={TextType.MARKDOWN}></SaveToServer>
+      {modal}
     </div>
   );
 }

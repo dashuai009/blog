@@ -1,7 +1,4 @@
 import {useRouter} from 'next/router'
-import Link from 'next/link'
-import {useEffect, useState} from "react";
-import BlogEditor, {CreateInitialConfig} from "@/lexical-playground/src/BlogEditor";
 import {PropsInterface} from "@/pages/api/blog-interface";
 import css from './index.module.css';
 import {BlogRender} from "@/non-pages/render";
@@ -10,7 +7,7 @@ export default function PostPage({status, msg, blog}: PropsInterface) {
     const router = useRouter()
     const id = router.query.id as string;
     const title = router.query.title as string;
-    console.log(status, msg, blog)
+    // console.log(status, msg, blog)
 
     return (
         <>
