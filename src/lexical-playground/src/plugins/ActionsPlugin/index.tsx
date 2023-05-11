@@ -13,7 +13,7 @@ import {exportFile, importFile} from '@lexical/file';
 import {
   $convertFromMarkdownString,
   $convertToMarkdownString,
-} from '@lexical/markdown';
+} from '@/lexical/markdown';
 import {useCollaborationContext} from '@lexical/react/LexicalCollaborationContext';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {mergeRegister} from '@lexical/utils';

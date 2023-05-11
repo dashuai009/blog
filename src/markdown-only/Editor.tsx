@@ -12,7 +12,7 @@ import {AutoLinkNode, LinkNode} from "@lexical/link";
 import {LinkPlugin} from "@lexical/react/LexicalLinkPlugin";
 import {ListPlugin} from "@lexical/react/LexicalListPlugin";
 import {MarkdownShortcutPlugin} from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import {$convertFromMarkdownString} from "@lexical/markdown";
+import {$convertFromMarkdownString} from "@/lexical/markdown";
 
 import ActionsPlugin from "./plugins/ActionsPlugin";
 import CodeHighlightPlugin from "./plugins/CodeHighlightPlugin";

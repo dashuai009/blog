@@ -1,11 +1,11 @@
-import type { ElementTransformer, Transformer } from "@lexical/markdown";
+import type { ElementTransformer, Transformer } from "@/lexical/markdown";
 import type { LexicalNode } from "lexical";
 
 import {
   ELEMENT_TRANSFORMERS,
   TEXT_FORMAT_TRANSFORMERS,
   TEXT_MATCH_TRANSFORMERS
-} from "@lexical/markdown";
+} from "@/lexical/markdown";
 import {
   $createHorizontalRuleNode,
   $isHorizontalRuleNode,

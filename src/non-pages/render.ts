@@ -9,7 +9,7 @@ import {
     $convertFromMarkdownString,
     $convertToMarkdownString,
     TRANSFORMERS
-} from "@lexical/markdown";
+} from "@/lexical/markdown";
 import {CreateMarkdownOnlyInitialConfig} from "@/markdown-only/Editor";
 
 function LexicalRender(EditorArgs: CreateEditorArgs, blog: BlogInterface) {

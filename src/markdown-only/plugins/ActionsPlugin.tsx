@@ -2,7 +2,7 @@ import { $createCodeNode, $isCodeNode } from "@lexical/code";
 import {
   $convertFromMarkdownString,
   $convertToMarkdownString
-} from "@lexical/markdown";
+} from "@/lexical/markdown";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $createTextNode, $getRoot } from "lexical";
 import * as React from "react";

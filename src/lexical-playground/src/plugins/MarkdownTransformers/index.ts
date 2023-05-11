@@ -16,7 +16,7 @@ import {
   TEXT_MATCH_TRANSFORMERS,
   TextMatchTransformer,
   Transformer,
-} from '@lexical/markdown';
+} from '@/lexical/markdown';
 import {
   $createHorizontalRuleNode,
   $isHorizontalRuleNode,
