@@ -23,6 +23,7 @@ import {
 } from 'lexical';
 
 import {transformersByType} from './utils';
+import {$isEquationNode} from "@/lexical-playground/src/nodes/EquationNode";
 
 export function createMarkdownExport(
   transformers: Array<Transformer>,
@@ -72,7 +73,9 @@ function exportTopLevelElements(
     }
   }
 
-  if ($isElementNode(node)) {
+  if($isEquationNode(node)){
+    return `$$\n${node.getEquation()}\n$$`;
+  } else if ($isElementNode(node)) {
     return exportChildren(node, textTransformersIndex, textMatchTransformers);
   } else if ($isDecoratorNode(node)) {
     return node.getTextContent();

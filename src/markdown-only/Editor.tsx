@@ -93,7 +93,7 @@ function Init({text}: any){
     return (<></>)
 }
 export default function MarkdownOnlyEditor({markdownText}: any) {
-    let editorConfig = CreateMarkdownOnlyInitialConfig(markdownText);
+    let editorConfig = CreateMarkdownOnlyInitialConfig("");
     editorConfig.editable = true;
     return (
         <LexicalComposer initialConfig={editorConfig as any}>
@@ -114,7 +114,7 @@ export default function MarkdownOnlyEditor({markdownText}: any) {
                     <CodeHighlightPlugin/>
                 </div>
                 <ActionsPlugin/>
-                {/*<Init text={markdownText}></Init>*/}
+                <Init text={markdownText}></Init>
             </div>
         </LexicalComposer>
     );

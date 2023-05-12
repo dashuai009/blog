@@ -13,6 +13,7 @@ export default function PostPage({status, msg, blog}: PropsInterface) {
         <>
             <h1>id: {id}</h1>
             <h1>title: {title}</h1>
+            <h1>type: {blog?.text_type}</h1>
             {/*<div>{blog?.text}</div>*/}
             {/*<div>{msg}</div>*/}
             <div className={css.editorContainer} dangerouslySetInnerHTML={{__html: msg}}/>

@@ -31,9 +31,11 @@ import {
 import {IS_APPLE_WEBKIT, IS_IOS, IS_SAFARI} from 'shared/environment';
 
 import {PUNCTUATION_OR_SPACE, transformersByType} from './utils';
+import {$createEquationNode, EquationNode} from "@/lexical-playground/src/nodes/EquationNode";
 
 const MARKDOWN_EMPTY_LINE_REG_EXP = /^\s{0,3}$/;
 const CODE_BLOCK_REG_EXP = /^```(\w{1,10})?\s?$/;
+const DISPLAY_EQUATION_REG_EXP = /\$\$\s?$/;
 type TextFormatTransformersIndex = Readonly<{
   fullMatchRegExpByTag: Readonly<Record<string, RegExp>>;
   openTagsRegExp: RegExp;
@@ -64,6 +66,13 @@ export function createMarkdownImport(
 
       if (codeBlockNode != null) {
         i = shiftedIndex;
+        continue;
+      }
+
+      const [displayEquationNode, shiftedIndex2] = importDisplayEquation(lines, i, root);
+
+      if (displayEquationNode != null) {
+        i = shiftedIndex2;
         continue;
       }
 
@@ -190,6 +199,32 @@ function importCodeBlock(
 
   return [null, startLineIndex];
 }
+
+function importDisplayEquation(
+    lines: Array<string>,
+    startLineIndex: number,
+    rootNode: ElementNode,
+): [EquationNode | null, number] {
+  const openMatch = lines[startLineIndex].match(DISPLAY_EQUATION_REG_EXP);
+
+  if (openMatch) {
+    let endLineIndex = startLineIndex;
+    const linesLength = lines.length;
+
+    while (++endLineIndex < linesLength) {
+      const closeMatch = lines[endLineIndex].match(DISPLAY_EQUATION_REG_EXP);
+
+      if (closeMatch) {
+        const equationNode = $createEquationNode(lines.slice(startLineIndex + 1, endLineIndex).join('\n'), false);
+        rootNode.append(equationNode);
+        return [equationNode, endLineIndex];
+      }
+    }
+  }
+
+  return [null, startLineIndex];
+}
+
 
 // Processing text content and replaces text format tags.
 // It takes outermost tag match and its content, creates text node with

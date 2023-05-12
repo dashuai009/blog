@@ -37,6 +37,7 @@ import {
   TextFormatType,
   TextNode,
 } from 'lexical';
+import {$createEquationNode, $isEquationNode, EquationNode} from "@/lexical-playground/src/nodes/EquationNode";
 
 export type Transformer =
   | ElementTransformer
@@ -155,6 +156,29 @@ const listExport = (
   }
 
   return output.join('\n');
+};
+
+export const INLINE_EQUATION: TextMatchTransformer = {
+  dependencies: [EquationNode],
+  export: (node) => {
+    if (!$isEquationNode(node)) {
+      return null;
+    }
+    if(node.__inline){
+      return `$${node.getEquation()}$`;
+    } else{
+      return `$$\n${node.getEquation()}\n$$\n`
+    }
+  },
+  importRegExp: /\$([^$]+?)\$/,
+  regExp: /\$([^$]+?)\$$/,
+  replace: (textNode, match) => {
+    const [, equation] = match;
+    const equationNode = $createEquationNode(equation, true);
+    textNode.replace(equationNode);
+  },
+  trigger: '$',
+  type: 'text-match',
 };
 
 export const HEADING: ElementTransformer = {
@@ -330,10 +354,7 @@ export const LINK: TextMatchTransformer = {
     if (!$isLinkNode(node)) {
       return null;
     }
-    const title = node.getTitle();
-    const linkContent = title
-      ? `[${node.getTextContent()}](${node.getURL()} "${title}")`
-      : `[${node.getTextContent()}](${node.getURL()})`;
+    const linkContent = `[${node.getTextContent()}](${node.getURL()})`;
     const firstChild = node.getFirstChild();
     // Add text styles only if link has single text node inside. If it's more
     // then one we ignore it as markdown does not support nested styles for links

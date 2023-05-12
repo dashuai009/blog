@@ -28,6 +28,7 @@ import {
   HEADING,
   HIGHLIGHT,
   INLINE_CODE,
+  INLINE_EQUATION,
   ITALIC_STAR,
   ITALIC_UNDERSCORE,
   LINK,
@@ -61,7 +62,7 @@ const TEXT_FORMAT_TRANSFORMERS: Array<TextFormatTransformer> = [
   STRIKETHROUGH,
 ];
 
-const TEXT_MATCH_TRANSFORMERS: Array<TextMatchTransformer> = [LINK];
+const TEXT_MATCH_TRANSFORMERS: Array<TextMatchTransformer> = [LINK, INLINE_EQUATION];
 
 const TRANSFORMERS: Array<Transformer> = [
   ...ELEMENT_TRANSFORMERS,
@@ -100,6 +101,7 @@ export {
   HEADING,
   HIGHLIGHT,
   INLINE_CODE,
+  INLINE_EQUATION,
   ITALIC_STAR,
   ITALIC_UNDERSCORE,
   LINK,
