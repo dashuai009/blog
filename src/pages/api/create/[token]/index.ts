@@ -21,7 +21,7 @@ export default async function handler(
     }
 
     let value = await (new BlogController()).create_new(req, res);
-    console.log("insert result = ", value)
+    // console.log("insert result = ", value)
     if(value.raw.insertId >= 0){
         res.send({
             status: 'yes',

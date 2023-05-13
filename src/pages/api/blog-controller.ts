@@ -9,6 +9,20 @@ export class BlogController {
     // async all(request: Request, response: Response, next: NextFunction) {
     //     return this.blogRepository.find()
     // }
+    async get_list(request: NextApiRequest, response: NextApiResponse) {
+        return this.blogRepository.createQueryBuilder("Blog_info")
+            .select("Blog_info.page_id")
+            .addSelect("Blog_info.title")
+            .addSelect("Blog_info.author")
+            .addSelect("Blog_info.tags")
+            .addSelect("Blog_info.views")
+            .addSelect("Blog_info.likes")
+            .addSelect("Blog_info.updated_at")
+            .addSelect("Blog_info.created_at")
+            .addSelect("Blog_info.content")
+            .cache(1)//缓存6分钟
+            .getMany()
+    }
 
     async get_page_by_id(request: NextApiRequest, response: NextApiResponse) {
         // console.log("get_page_by_id", request.query)

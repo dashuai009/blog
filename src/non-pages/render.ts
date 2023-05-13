@@ -7,6 +7,7 @@ import {CreateEditorArgs} from "lexical/LexicalEditor";
 import {PLAYGROUND_TRANSFORMERS} from "@/markdown-only/plugins/MarkdownTransformers";
 import {$convertFromMarkdownString, $convertToMarkdownString} from "@/lexical/markdown";
 import {CreateMarkdownOnlyInitialConfig} from "@/markdown-only/Editor";
+import {registerCodeHighlighting} from "./CodeHighlighter";
 
 function LexicalRender(EditorArgs: CreateEditorArgs, blog: BlogInterface) {
     const dom = new JSDOM();
@@ -19,6 +20,7 @@ function LexicalRender(EditorArgs: CreateEditorArgs, blog: BlogInterface) {
         editor.setEditorState(editor.parseEditorState(blog.text));
     } else if (blog.text_type == TextType.MARKDOWN) {
         editor.setEditorState(editor.parseEditorState(`{\"root\":{\"children\":[{\"children\":[],\"direction\":null,\"format\":\"\",\"indent\":0,\"type\":\"paragraph\",\"version\":1}],\"direction\":null,\"format\":\"\",\"indent\":0,\"type\":\"root\",\"version\":1}}`));
+        registerCodeHighlighting(editor, undefined, true)
         editor.update(() => {
             $convertFromMarkdownString(blog.text, PLAYGROUND_TRANSFORMERS)
         })

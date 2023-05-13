@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
     "@excalidraw/excalidraw": "0.14.2",
     "@lexical/clipboard": "0.9.1",
     "@lexical/code": "0.9.1",
@@ -25,7 +27,9 @@
     "@lexical/selection": "0.9.1",
     "@lexical/table": "0.9.1",
     "@lexical/utils": "0.9.1",
-    "@mui/material": "^5.12.1",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/lab": "^5.0.0-alpha.129",
+    "@mui/material": "^5.13.0",
     "autoprefixer": "10.4.14",
     "eslint": "8.38.0",
     "eslint-config-next": "13.3.0",
@@ -38,6 +42,7 @@
     "next": "13.3.0",
     "postcss": "8.4.21",
     "prettier": "^2.3.2",
+    "prismjs": "^1.29.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-error-boundary": "^3.1.4",
@@ -48,14 +53,15 @@
     "yjs": ">=13.5.42"
   },
   "devDependencies": {
-    "@types/node": "18.15.11",
-    "@types/react": "18.0.35",
-    "@types/react-dom": "18.0.11",
     "@types/jsdom": "^21.1.1",
     "@types/katex": "^0.16.0",
     "@types/lodash-es": "^4.17.7",
     "@types/markdown-it": "^12.2.3",
-    "@types/prettier": "^2.7.2"
+    "@types/node": "18.15.11",
+    "@types/prettier": "^2.7.2",
+    "@types/prismjs": "^1.26.0",
+    "@types/react": "18.0.35",
+    "@types/react-dom": "18.0.11"
   },
   "browser": {
     "tls": false,

@@ -1,124 +1,148 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Typography from "@mui/material/Typography";
+import Masonry from "@mui/lab/Masonry";
 
-const inter = Inter({ subsets: ['latin'] })
+import Link from '@mui/material/Link';
+//
+// const inter = Inter({subsets: ['latin']})
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import {styled, ThemeProvider, createTheme} from '@mui/material/styles';
+import Divider from '@mui/material/Divider';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Paper from '@mui/material/Paper';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import ArrowRight from '@mui/icons-material/ArrowRight';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import Settings from '@mui/icons-material/Settings';
+import People from '@mui/icons-material/People';
+import PermMedia from '@mui/icons-material/PermMedia';
+import Dns from '@mui/icons-material/Dns';
+import Public from '@mui/icons-material/Public';
+import {useState} from "react";
+import {useRouter} from "next/router";
 
-export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+const data = [
+    {icon: <People/>, label: 'katex-wasm', herf: 'https://github.com/dashuai009/katex-wasm'},
+    {icon: <Dns/>, label: 'cpp20學習記錄', herf: 'https://github.com/dashuai009/cpp20_demo'},
+    // { icon: <PermMedia />, label: 'Storage', herf:'https://github.com/dashuai009/katex-wasm'  },
+    // { icon: <Public />, label: 'Hosting', herf:'https://github.com/dashuai009/katex-wasm'  },
+];
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+const FireNav = styled(List)<{ component?: React.ElementType }>({
+    '& .MuiListItemButton-root': {
+        paddingLeft: 24,
+        paddingRight: 24,
+    },
+    '& .MuiListItemIcon-root': {
+        minWidth: 0,
+        marginRight: 16,
+    },
+    '& .MuiSvgIcon-root': {
+        fontSize: 20,
+    },
+});
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p
-            className={`${inter.className} m-0 max-w-[30ch] text-sm opacity-50`}
-          >
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+export default function Home(props: any) {
+    const router = useRouter();
+    const [open, setOpen] = useState(true);
+    return (
+        <>
+            <main>
+                <Masonry columns={2} spacing={2} sx={{margin: "30px auto"}}>
+                    {/*github*/}
+                    <Paper
+                        sx={{
+                            pb: open ? 2 : 0,
+                        }}
+                    >
+                        <ListItemButton
+                            alignItems="flex-start"
+                            onClick={() => setOpen(!open)}
+                            sx={{
+                                px: 3,
+                                pt: 2.5,
+                                pb: open ? 0 : 2.5,
+                                '&:hover, &:focus': {'& svg': {opacity: open ? 1 : 0}},
+                            }}
+                        >
+                            <ListItemText
+                                primary="👋Github"
+                                primaryTypographyProps={{
+                                    fontSize: 15,
+                                    fontWeight: 'medium',
+                                    lineHeight: '20px',
+                                    mb: '2px',
+                                }}
+                                secondary={data.map(item => item.label).join("  ")}
+                                secondaryTypographyProps={{
+                                    noWrap: true,
+                                    fontSize: 12,
+                                    lineHeight: '16px',
+                                    color: open ? 'rgba(0,0,0,0)' : 'rgba(55,25,25,0.5)',
+                                }}
+                                sx={{my: 0}}
+                            />
+                            <KeyboardArrowDown
+                                sx={{
+                                    mr: -1,
+                                    opacity: 0,
+                                    transform: open ? 'rotate(-180deg)' : 'rotate(0)',
+                                    transition: '0.2s',
+                                }}
+                            />
+                        </ListItemButton>
+                        {open &&
+                            data.map((item) => (
+                                <ListItemButton
+                                    key={item.label}
+                                    sx={{py: 0, minHeight: 32}}
+                                    onClick={(e) => {
+                                        router.push(item.herf)
+                                    }}
+                                >
+                                    <ListItemIcon sx={{color: 'inherit'}}>
+                                        {item.icon}
+                                    </ListItemIcon>
+                                    <ListItemText
+                                        primary={item.label}
+                                        primaryTypographyProps={{fontSize: 14, fontWeight: 'medium'}}
+                                    > </ListItemText>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p
-            className={`${inter.className} m-0 max-w-[30ch] text-sm opacity-50`}
-          >
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p
-            className={`${inter.className} m-0 max-w-[30ch] text-sm opacity-50`}
-          >
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
+                                </ListItemButton>
+                            ))}
+                    </Paper>
+                    <Paper>
+                        Email: dashuai009@petalmail.com （不常用)
+                    </Paper>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p
-            className={`${inter.className} m-0 max-w-[30ch] text-sm opacity-50`}
-          >
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+                </Masonry>
+
+                <div className="app-footer">
+                    dashuai<a href="https://beian.miit.gov.cn" style={{color: "#939393"}}>{"鲁ICP备2021005921号"}</a>
+                    <div style={{width: 300, margin: "0 auto", padding: "5px 0"}}>
+                        <a target="_blank"
+                           href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=37131202371426"
+                           style={{display: "inline-block", textDecoration: "none", height: 20, lineHeight: 20}}>
+                            <img src="assets/备案图标.png" style={{float: "left"}}/>
+                            <p style={{
+                                float: "left",
+                                height: 20,
+                                lineHeight: 20,
+                                margin: "0px 0px 0px 5px",
+                                color: "#939393"
+                            }}>{"鲁公网安备37131202371426号"}</p>
+                        </a>
+                    </div>
+                </div>
+            </main>
+        </>
+    )
 }

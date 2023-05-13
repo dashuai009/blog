@@ -62,7 +62,7 @@ export async function getServerSideProps({params}: any): Promise<{ props: PropsI
     // console.log(`getServerSideProps server id = ${id}`);
     const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/pages/${id}`);
     const data = await res.json();
-    console.log("get_ser res = ", data)
+    // console.log("get_ser res = ", data)
 
     // Pass data to the page via props
     return {

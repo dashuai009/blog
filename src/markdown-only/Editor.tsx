@@ -25,6 +25,7 @@ import {EquationNode} from "@/lexical-playground/src/nodes/EquationNode";
 import EquationsPlugin from "@/lexical-playground/src/plugins/EquationsPlugin";
 import {HorizontalRuleNode} from "@lexical/react/LexicalHorizontalRuleNode";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
+import {ImageNode} from "@/lexical/image";
 
 function Placeholder() {
     return (
@@ -75,7 +76,8 @@ export function CreateMarkdownOnlyInitialConfig(contentJson: string): CreateEdit
             AutoLinkNode,
             LinkNode,
             EquationNode,
-            HorizontalRuleNode
+            HorizontalRuleNode,
+            ImageNode
         ],
         onError: (error: Error) => {
             throw error;

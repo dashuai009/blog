@@ -26,7 +26,7 @@ export default function Index() {
         fetch(`${process.env.NEXT_PUBLIC_HOST}/api/check_edit_token/${token}`)
             .then((res) => res.json())
             .then((res) => {
-                console.log(`check_edit_token result = ${res}`)
+                // console.log(`check_edit_token result = ${res}`)
                 if (res.status == 'yes') {
                     setStatus(2);
                     // setId(res.id);
@@ -65,9 +65,9 @@ export default function Index() {
         data.text = "";
 
 
-        console.log("insert new", data);
+        // console.log("insert new", data);
         if(!token){
-            console.log("token is empty")
+            // console.log("token is empty")
         }
         fetch(`${process.env.NEXT_PUBLIC_HOST}/api/create/${token}`, {
             method: 'POST',
@@ -81,11 +81,11 @@ export default function Index() {
         })
             .then(res => res.json())
             .then(res => {
-                console.log("result = ", res)
+                // console.log("result = ", res)
                 if (res.status == 'yes') {
                     router.push(`/edit/${res.page_id}/${token}`)
                 } else {
-                    console.log(`create new page error: ${res}`);
+                    // console.log(`create new page error: ${res}`);
                 }
             })
     }

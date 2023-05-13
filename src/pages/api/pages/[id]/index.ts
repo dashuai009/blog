@@ -11,7 +11,7 @@ export default async function handler(
 ) {
     const {id} = req.query;
 
-    console.log(`/pages/id id = ${id}`)
+    // console.log(`/pages/id id = ${id}`)
     if (AppDataSource.isInitialized) {
 
     } else {
