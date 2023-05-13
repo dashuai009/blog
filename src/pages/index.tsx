@@ -27,6 +27,7 @@ import Dns from '@mui/icons-material/Dns';
 import Public from '@mui/icons-material/Public';
 import {useState} from "react";
 import {useRouter} from "next/router";
+import Head from "next/head";
 
 const data = [
     {icon: <People/>, label: 'katex-wasm', herf: 'https://github.com/dashuai009/katex-wasm'},
@@ -54,6 +55,23 @@ export default function Home(props: any) {
     const [open, setOpen] = useState(true);
     return (
         <>
+            <Head>
+                <title>大帅dashuai</title>
+                <base href="/"/>
+                <meta itemProp="name" content="大帅"/>
+                <meta itemProp="image" content="https://www.dashuai009.icu/favicon.ico"/>
+                <meta name="description" itemProp="description" content="An Algorithm Explorer."/>
+
+                <meta name="google-site-verification"
+                      content="2R8n0Ai0ScQFUkAceCJYiyd69bl30Z5goYZo9z6X6gk"/>
+
+                <meta property="og:title" content="大帅dashuai"/>
+                <meta property="og:url" content="https://www.dashuai009.icu"/>
+                <meta property="og:image"
+                      content="https://www.dashuai009.icu/favicon.ico"/>
+                <meta property="og:description" content="^~^ ^~^ ^~^ ^~^ ^~^"/>
+
+            </Head>
             <main>
                 <Masonry columns={2} spacing={2} sx={{margin: "30px auto"}}>
                     {/*github*/}

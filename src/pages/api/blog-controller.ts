@@ -20,7 +20,7 @@ export class BlogController {
             .addSelect("Blog_info.updated_at")
             .addSelect("Blog_info.created_at")
             .addSelect("Blog_info.content")
-            .cache(1)//缓存6分钟
+            .cache(1000 * 60 * 6)//缓存6分钟
             .getMany()
     }
 
