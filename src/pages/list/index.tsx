@@ -34,7 +34,7 @@ export default function BasicCard({status, msg, data}: ListInfos) {
                                 {/*</Typography>*/}
                                 <Link variant="h5" component="div" onClick={(e) => {
                                     router.push(`/pages/${item.page_id}/${encodeURIComponent(item.title)}`)
-                                }} underline="hover">
+                                }} underline="none" color={"black"}>
                                     {item.title}
                                 </Link>
 
@@ -48,7 +48,7 @@ export default function BasicCard({status, msg, data}: ListInfos) {
                             <CardActions>
                                 <Button size="small" color={"warning"}> <FavoriteBorderIcon/> {item.likes}</Button>
                                 <Button size="small"> <VisibilityIcon/>{item.views}</Button>
-                                <Button size="small">
+                                <Button size="small" color={"inherit"}>
                                     <EditIcon/>{(new Date(item.created_at)).toLocaleDateString("en-US")}</Button>
                             </CardActions>
                         </Card>

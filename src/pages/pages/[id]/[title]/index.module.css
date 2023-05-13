@@ -15,6 +15,9 @@
     line-height: 1.7;
 }
 
+.editorContainer  img{
+    max-width: 100%;
+}
 
 .inner-page {
     width: 100%;
