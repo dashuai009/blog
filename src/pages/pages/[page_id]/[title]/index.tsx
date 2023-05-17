@@ -78,15 +78,18 @@ export async function getStaticProps({params}: any) {
 // the path has not been generated.
 export async function getStaticPaths() {
     const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/pages/get_all_id_and_title`);
+    // console.log(res.body)
+    if (!res.ok) {
+        return {paths: [], fallback: 'blocking'}
+    }
     const posts = await res.json();
     //
     // // Get the paths we want to pre-render based on posts
-    const paths = posts.data.map((post : { page_id: number, title: string }) => ({
-        params: { page_id: post.page_id.toString(), title: encodeURIComponent(post.title)},
+    const paths = posts.data.map((post: { page_id: number, title: string }) => ({
+        params: {page_id: post.page_id.toString(), title: encodeURIComponent(post.title)},
     }));
-
     // We'll pre-render only these paths at build time.
     // { fallback: 'blocking' } will server-render pages
     // on-demand if the path doesn't exist.
-    return { paths, fallback: 'blocking' };
+    return {paths, fallback: 'blocking'};
 }

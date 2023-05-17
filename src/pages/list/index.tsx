@@ -67,6 +67,16 @@ export default function BasicCard({status, msg, data}: ListInfos) {
 
 export async function getStaticProps() {
     const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/list`);
+    if(!res.ok){
+        return {
+            props: {
+                status: "no",
+                msg: "api/list failed",
+                data: []
+            },
+            revalidate: 10
+        }
+    }
     const {status, msg, data} = await res.json();
 
     if (status == 'yes') {
@@ -83,7 +93,7 @@ export async function getStaticProps() {
     } else {
         // Pass data to the page via props
         return {
-            props: {status: status, msg: msg, data: null},
+            props: {status: status, msg: msg, data: []},
             revalidate: 10
         }
     }

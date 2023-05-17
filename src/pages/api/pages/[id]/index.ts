@@ -10,6 +10,14 @@ export default async function handler(
     res: NextApiResponse<PropsInterface>
 ) {
     const {id} = req.query;
+    let page_id = parseInt(id as string);
+    if (isNaN(page_id)){
+        res.status(200).json({
+            status: 'no',
+            msg: "page_id is nan",
+            blog: null
+        })
+    }
 
     // console.log(`/pages/id id = ${id}`)
     if (AppDataSource.isInitialized) {
