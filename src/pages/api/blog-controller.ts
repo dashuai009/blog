@@ -38,6 +38,14 @@ export class BlogController {
         }
         return user
     }
+
+    async get_all_id_and_title(request: NextApiRequest, response: NextApiResponse) {
+        return this.blogRepository.createQueryBuilder("Blog_info")
+            .select("Blog_info.page_id")
+            .addSelect("Blog_info.title")
+            .cache(1000 * 60 * 6)//缓存6分钟
+            .getMany()
+    }
     create_new(request: NextApiRequest, response: NextApiResponse){
         // console.log("create_new", request.body);
         const {page_info} = request.body;

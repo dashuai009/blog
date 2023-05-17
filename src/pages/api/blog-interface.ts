@@ -39,3 +39,8 @@ export class BlogInterface {
 
     text_type!:TextType;
 }
+
+export interface ListInterface{
+    status: 'yes' | 'no',
+    data: { page_id: number, title: string}[];
+}
