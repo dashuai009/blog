@@ -28,6 +28,7 @@ import Public from '@mui/icons-material/Public';
 import {useState} from "react";
 import {useRouter} from "next/router";
 import Head from "next/head";
+import Image from "next/image";
 
 const data = [
     {icon: <People/>, label: 'katex-wasm', herf: 'https://github.com/dashuai009/katex-wasm'},
@@ -145,19 +146,13 @@ export default function Home(props: any) {
 
                 <div className="app-footer">
                     dashuai<a href="https://beian.miit.gov.cn" style={{color: "#939393"}}>{"鲁ICP备2021005921号"}</a>
-                    <div style={{width: 300, margin: "0 auto", padding: "5px 0"}}>
-                        <a target="_blank"
+                    <div style={{width: 300, margin: "0 auto", padding: "5px 0", height: "30px"}}>
+                        <Link target="_blank"
                            href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=37131202371426"
-                           style={{display: "inline-block", textDecoration: "none", height: 20, lineHeight: 20}}>
-                            <img src="assets/备案图标.png" style={{float: "left"}}/>
-                            <p style={{
-                                float: "left",
-                                height: 20,
-                                lineHeight: 20,
-                                margin: "0px 0px 0px 5px",
-                                color: "#939393"
-                            }}>{"鲁公网安备37131202371426号"}</p>
-                        </a>
+                           style={{display: "inline-block", textDecoration: "none", height: "25px", lineHeight: "20px", color: "#939393"}}>
+                            <Image src="/备案图标.png" width={20} height={20} style={{float: "left", width: "auto"}} alt={"备案图标"}/>
+                            {"鲁公网安备37131202371426号"}
+                        </Link>
                     </div>
                 </div>
             </main>
