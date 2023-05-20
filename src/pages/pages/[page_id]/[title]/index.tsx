@@ -2,9 +2,10 @@ import {useRouter} from 'next/router'
 import {PropsInterface} from "@/pages/api/blog-interface";
 import css from './index.module.css';
 import {BlogRender} from "@/non-pages/render";
-import {Chip} from "@mui/material";
-import Box from "@mui/material/Box";
+import {Chip, Container, Stack} from "@mui/material";
 import Head from "next/head";
+import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
 
 export default function PostPage({status, msg, blog}: PropsInterface) {
     const router = useRouter();
@@ -14,31 +15,33 @@ export default function PostPage({status, msg, blog}: PropsInterface) {
             <Head>
                 <title>{blog?.title}</title>
             </Head>
-            <div className={css.mainInfo}>
-                <div className={css.banner}>
+            <Container className={css.editorContainer}>
+                <Box sx={{m: "20px auto"}}>
                     <h1 className={css.title}>{blog!.title}</h1>
                     <div className={css.date}>
                         {(new Date(blog!.updated_at)).toLocaleDateString('en-US')}
                     </div>
-                    <Box className={css.tags} sx={{listStyle: 'none'}}>
-                        <li>
-                            {blog!.tags.map((tag: string) => {
-                                    return <Chip key={tag} label={tag}/>
-                                }
-                            )}
-                        </li>
-                        {/*    <mat-chip-list aria-label="tags">*/}
-                        {/*        <mat-chip *ngFor="let tag of page.data.tags" selected color="primary">*/}
-                        {/*        {{tag}}*/}
-                        {/*    </mat-chip>*/}
-                        {/*</mat-chip-list>*/}
-                    </Box>
-                </div>
-            </div>
-            {/*<div>{blog?.text}</div>*/}
-            {/*<div>{msg}</div>*/}
-            <div className={css.editorContainer} dangerouslySetInnerHTML={{__html: msg}}/>
-            {/*<BlogEditor editMode={false} contentJson={data.blog.text}/>*/}
+
+                    <Stack
+                        direction="row"
+                        justifyContent="flex-start"
+                        alignItems="center"
+                        useFlexGap flexWrap="wrap"
+                        spacing={1.5}
+                    >
+                        {blog!.tags.map((tag: string) => {
+                                return <Chip key={tag} label={tag}/>
+                            }
+                        )}
+                    </Stack>
+                </Box>
+                {/*<div>{blog?.text}</div>*/}
+                {/*<div>{msg}</div>*/}
+                <Paper elevation={10} sx={{p: "15px"}} dangerouslySetInnerHTML={{__html: msg}}/>
+                {/*<BlogEditor editMode={false} contentJson={data.blog.text}/>*/}
+
+            </Container>
+
         </>
     )
 }

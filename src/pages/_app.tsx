@@ -34,6 +34,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import {createSvgIcon} from '@mui/material/utils';
 import Link from "next/link";
 import {useRouter} from "next/router";
+import {enqueueSnackbar, SnackbarProvider} from 'notistack';
 
 const HomeIcon = createSvgIcon(
     <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>,
@@ -125,10 +126,12 @@ export default function App({Component, pageProps}: AppProps) {
             </AppBar>
             <Toolbar id="back-to-top-anchor"/>
 
-            <Container>
+            <Container sx={{padding:"5px"}}>
                 <Component {...pageProps} />
             </Container>
 
+
+            <SnackbarProvider maxSnack={5} />
             <ScrollTop {...pageProps}>
                 <Fab size="small" aria-label="scroll back to top">
                     <KeyboardArrowUpIcon/>

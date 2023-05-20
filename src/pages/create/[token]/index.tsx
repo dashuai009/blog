@@ -1,5 +1,4 @@
 import {useRouter} from 'next/router'
-import Link from 'next/link'
 import {useEffect, useState} from "react";
 
 import React from 'react';
@@ -8,7 +7,7 @@ import {BlogInterface, TextType} from "@/pages/api/blog-interface";
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import {FormControl, FormLabel, MenuItem} from '@mui/material';
+import { MenuItem} from '@mui/material';
 
 export default function Index() {
     const router = useRouter()
@@ -89,11 +88,13 @@ export default function Index() {
                 }
             })
     }
+    const textFieldVariant = "outlined";
     return (
         <Box
             component="form"
             sx={{
-                '& > :not(style)': {m: 1, width: '25ch'},
+                m: "10px 10%",
+                '& > :not(style)': {width: "80%", m: "10px 10%"},
             }}
             noValidate
             autoComplete="off"
@@ -102,23 +103,30 @@ export default function Index() {
                 id="page-title"
                 label="Title"
                 onChange={e => setTitle(e.target.value)}
-                variant="standard"/>
+                variant={textFieldVariant}/>
+            <br/>
             <TextField
                 id="page-author"
                 label="Author"
                 value={author}
                 onChange={e => setAuthor(e.target.value)}
-                variant="standard"/>
+                variant={textFieldVariant}/>
+            <br/>
             <TextField
                 id="page-tags"
                 label="Tags"
-                onChange={e => setTags([e.target.value])}
-                variant="standard"/>
+                helperText="输入以空格分割的多个tag"
+                onChange={e => setTags(e.target.value.split(' '))}
+                variant={textFieldVariant}/>
+            <br/>
             <TextField
                 id="page-content"
                 label="Content"
+                multiline
+                rows={3}
                 onChange={e => setContent(e.target.value)}
-                variant="standard"/>
+                variant={textFieldVariant}/>
+            <br/>
             <TextField
                 id="page-text-type"
                 select
@@ -133,6 +141,7 @@ export default function Index() {
                     </MenuItem>
                 ))}
             </TextField>
+            <br/>
             <Button type="submit" onClick={handleSubmit}>Submit</Button>
         </Box>
     )

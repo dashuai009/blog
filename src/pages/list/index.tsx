@@ -5,7 +5,6 @@ import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
-import css from './index.module.css'
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -13,6 +12,7 @@ import Link from '@mui/material/Link';
 import Masonry from '@mui/lab/Masonry';
 import EditIcon from '@mui/icons-material/Edit';
 import {useRouter} from "next/router";
+import Box from "@mui/material/Box";
 
 interface ListInfos {
     status: 'yes' | 'no',
@@ -23,7 +23,7 @@ interface ListInfos {
 export default function BasicCard({status, msg, data}: ListInfos) {
     const router = useRouter();
     return (
-        <div className={css.container}>
+        <Box sx={{margin: "10px auto"}}>
             <Masonry columns={4} spacing={2}>
                 {
                     data.map((item: any) => (
@@ -55,7 +55,7 @@ export default function BasicCard({status, msg, data}: ListInfos) {
                     ))
                 }
             </Masonry>
-        </div>
+        </Box>
 
     );
 }
