@@ -323,21 +323,18 @@ function importTextMatchTransformers(
 
       const startIndex = match.index || 0;
       const endIndex = startIndex + match[0].length;
-      let replaceNode, leftTextNode, rightTextNode;
+      let replaceNode, leftTextNode;
 
       if (startIndex === 0) {
         [replaceNode, textNode] = textNode.splitText(endIndex);
       } else {
-        [leftTextNode, replaceNode, rightTextNode] = textNode.splitText(
+        [leftTextNode, replaceNode, textNode] = textNode.splitText(
           startIndex,
           endIndex,
         );
       }
       if (leftTextNode) {
         importTextMatchTransformers(leftTextNode, textMatchTransformers);
-      }
-      if (rightTextNode) {
-        textNode = rightTextNode;
       }
       transformer.replace(replaceNode, match);
       continue mainLoop;
