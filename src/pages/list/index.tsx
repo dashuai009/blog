@@ -13,6 +13,8 @@ import Masonry from '@mui/lab/Masonry';
 import EditIcon from '@mui/icons-material/Edit';
 import {useRouter} from "next/router";
 import Box from "@mui/material/Box";
+import BottomAction from "@/components/BottomAction";
+import {CardHeader} from "@mui/material";
 
 interface ListInfos {
     status: 'yes' | 'no',
@@ -24,10 +26,20 @@ export default function BasicCard({status, msg, data}: ListInfos) {
     const router = useRouter();
     return (
         <Box sx={{margin: "10px auto"}}>
-            <Masonry columns={4} spacing={2}>
+            <Masonry
+                spacing={2.5}
+                defaultHeight={300}
+                defaultColumns={4}
+                defaultSpacing={1}>
                 {
                     data.map((item: any) => (
-                        <Card key={item.page_id} sx={{minWidth: 275, maxWidth: 350}}>
+                        <Card key={item.page_id} sx={{minWidth: 275, maxWidth: 350, borderRadius: 3.9}}>
+                            {/*<CardHeader*/}
+                            {/*    title={item.title}*/}
+                            {/*    subheader={item.author}*/}
+                            {/*>*/}
+
+                            {/*</CardHeader>*/}
                             <CardContent>
                                 {/*<Typography sx={{fontSize: 14}} color="text.secondary" gutterBottom>*/}
                                 {/*    {item.title}*/}
@@ -38,19 +50,16 @@ export default function BasicCard({status, msg, data}: ListInfos) {
                                     {item.title}
                                 </Link>
 
-                                <Typography sx={{mb: 1.5}} color="text.secondary">
-                                    {item.anchor}
+                                <Typography sx={{mb: 1.5}}>
+                                    {item.author}
                                 </Typography>
-                                <Typography variant="body2">
+                                <Typography variant="body2" color="text.secondary">
                                     {item.content}
                                 </Typography>
                             </CardContent>
-                            <CardActions>
-                                <Button size="small" color={"warning"}> <FavoriteBorderIcon/> {item.likes}</Button>
-                                <Button size="small"> <VisibilityIcon/>{item.views}</Button>
-                                <Button size="small" color={"inherit"}>
-                                    <EditIcon/>{(new Date(item.created_at)).toLocaleDateString("en-US")}</Button>
-                            </CardActions>
+                            <Box sx={{mb: 0.5}}>
+                                <BottomAction blog_data={item}></BottomAction>
+                            </Box>
                         </Card>
                     ))
                 }
@@ -67,7 +76,7 @@ export default function BasicCard({status, msg, data}: ListInfos) {
 
 export async function getStaticProps() {
     const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/list`);
-    if(!res.ok){
+    if (!res.ok) {
         return {
             props: {
                 status: "no",

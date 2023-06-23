@@ -72,6 +72,40 @@ export class BlogController {
             .where("page_id = :page_id", {page_id: page_id})
             .execute();
     }
+
+
+    async like(request: NextApiRequest, response: NextApiResponse) {
+        const { page_id, likes } = request.body;
+        if (parseInt(page_id) >= 0){
+            // console.log(`sql like id = ${page_id}, likes ${likes}`, likes ? 'likes+1' : 'likes-1')
+            return this.blogRepository
+                .createQueryBuilder()
+                .update(Blog)
+                .set({
+                    likes: () => likes ? 'likes+1' : 'likes-1',
+                    updated_at: () => 'updated_at'
+                })
+                .where("page_id = :page_id", {page_id: page_id})
+                .execute();
+        }
+    }
+
+    async view(request: NextApiRequest, response: NextApiResponse) {
+        const { page_id } = request.body;
+        // console.log("page_id" , page_id, request.body)
+        if (parseInt(page_id) >= 0){
+            // console.log(`sql view ${page_id}`)
+            return this.blogRepository
+                .createQueryBuilder()
+                .update(Blog)
+                .set({
+                    views: () => 'views+1',
+                    updated_at: () => 'updated_at'
+                })
+                .where("page_id = :page_id", {page_id: page_id})
+                .execute();
+        }
+    }
     //
     // async remove(request: Request, response: Response, next: NextFunction) {
     //     const id = parseInt(request.params.id)

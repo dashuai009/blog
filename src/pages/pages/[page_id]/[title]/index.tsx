@@ -6,10 +6,22 @@ import {Chip, Container, Stack} from "@mui/material";
 import Head from "next/head";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
+import BottomAction from "@/components/BottomAction";
 
 export default function PostPage({status, msg, blog}: PropsInterface) {
     const router = useRouter();
-
+    if (typeof window === 'undefined') {// 统计访问次数
+        // console.log("view = ", blog?.page_id);
+        fetch(`${process.env.NEXT_PUBLIC_HOST}/api/count/view/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                page_id: blog?.page_id
+            })
+        });
+    }
     return (
         <>
             <Head>
@@ -39,7 +51,9 @@ export default function PostPage({status, msg, blog}: PropsInterface) {
                 {/*<div>{msg}</div>*/}
                 <Paper elevation={10} sx={{p: "15px"}} dangerouslySetInnerHTML={{__html: msg}}/>
                 {/*<BlogEditor editMode={false} contentJson={data.blog.text}/>*/}
-
+                <Box sx={{mt: 2.5, mb: 5}}>
+                    <BottomAction blog_data={blog}></BottomAction>
+                </Box>
             </Container>
 
         </>
