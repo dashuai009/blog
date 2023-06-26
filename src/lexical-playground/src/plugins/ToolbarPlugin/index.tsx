@@ -91,6 +91,7 @@ import {InsertPollDialog} from '../PollPlugin';
 import {InsertNewTableDialog, InsertTableDialog} from '../TablePlugin';
 import SaveToServer from './SaveToServer';
 import {TextType} from "@/pages/api/blog-interface";
+import AddPicture from "@/lexical-playground/src/plugins/ToolbarPlugin/AddPicture";
 
 const blockTypeToBlockName = {
   bullet: 'Bulleted List',
@@ -996,6 +997,7 @@ export default function ToolbarPlugin(): JSX.Element {
 
       <Divider />
       <SaveToServer textType={TextType.LEXICAL_RICHTEXT}/>
+      <AddPicture/>
         {modal}  
     </div>
   );
