@@ -1,0 +1,555 @@
+---
+title: 'katex-wasm 的 coding agent 自动性能优化'
+pubDate: 2026-09-14
+description: "结合 katex-wasm 源码，解释 Rust/WASM 公式渲染中的所有权、稀疏样式、字符串输出、分配器优化与可信性能测试。"
+author: "codex"
+tags: ["Rust", "WebAssembly", "KaTeX", "性能优化"]
+---
+
+# katex-wasm 的 coding agent 自动性能优化
+
+把 JavaScript 代码移植到 Rust，再编译成 WebAssembly，并不会自动获得更好的性能。
+
+[上一篇文章](/blog/056/)介绍了 katex-wasm 的项目背景与使用方式。这篇单独讨论公式渲染的性能优化：如何减少复制和分配，以及如何验证优化是否有效。
+
+[katex-wasm](https://github.com/dashuai009/katex-wasm) 是一个用 Rust 重写 KaTeX 核心渲染逻辑、通过 WebAssembly 在浏览器中运行的项目。它提供浏览器端 DOM 渲染、HTML 字符串输出，也提供用于本地批处理和调试的 CLI。[在线 Demo](https://dashuai009.github.io/katex-wasm/) 可以对照查看本项目、KaTeX.js 和独立上游 katex-rs 的输出与性能。
+
+项目基本沿用了 KaTeX 的解析和排版流程：
+
+```text
+LaTeX → 分词 → 宏展开 → 解析树 → 排版树 → HTML 字符串
+```
+
+浏览器侧的 `renderToString(expression, settings)` 返回标记字符串，`render(expression, base_node, options)` 将结果写入 DOM；Rust 侧可以通过 `render_to_string` 复用渲染逻辑。本文讨论的优化主要围绕 HTML 生成路径展开。
+
+最初的浏览器测试中，Rust/WASM 实现明显慢于 KaTeX.js。经过多轮分析和优化，历史测试集上的整批 HTML 生成耗时从约 **102.3 ms 降到了 21.45 ms**，减少约 **79%**。
+
+这组数据来自 Apple M5 Max 上的 Chromium 145.0.7632.6，使用 im2latex 前 1000 条输入中三方共同成功的 **397 条公式**。21.45 ms 是三个独立浏览器验证运行的批次中位数再取中位数；它说明这轮优化在特定环境和输入集上有效，不代表所有浏览器、所有公式或首次加载场景都有同样的收益。
+
+本文代码按 2026 年 9 月 11 日的本地仓库核对，片段旁附对应源文件链接；注明“节选”或“示意”的代码不包含完整上下文。性能数字引用仓库保存的[历史报告与原始数据](https://github.com/dashuai009/katex-wasm/blob/main/docs/performance.md)，并非本文更新时重新测得。比数字更值得讨论的是：这些提升从哪里来，以及背后涉及哪些可以复用的知识。
+
+## 1. 所有权设计，会直接影响算法的实际成本
+
+跨语言移植时，很容易保留原来的控制流程，却改变了数据操作的成本。
+
+例如，在 JavaScript 中，下面的操作通常只是取得一个对象引用，并没有复制整棵子树：
+
+```javascript
+const child = node.body;
+```
+
+但在 Rust 中，如果为了让代码通过借用检查而写成下面这样，就需要关注 `clone()` 到底做了什么：
+
+```rust
+// 示意：成本取决于 body 的类型及其 Clone 实现。
+let child = node.body.clone();
+```
+
+对于 `String`，克隆通常需要分配并复制内容；对于递归树结构，它可能复制所有后代节点。这类开销在分式、上下标和嵌套分组中尤其容易累积。
+
+我们的处理原则是：只查看数据时使用借用；当前阶段已经消费完数据时转移所有权；多处需要长期持有同一份只读数据时，再考虑共享所有权。
+
+### 只读前瞻：返回引用，而不是复制 token
+
+解析器检查下一个 token 是否为 `^` 或 `_` 时，不需要取得独立副本。[Parser.rs](https://github.com/dashuai009/katex-wasm/blob/main/src/Parser.rs) 中新增的 `fetch_ref()` 如下：
+
+```rust
+fn fetch_ref(&mut self) -> &Token {
+    if self.next_token.is_none() {
+        let token = self.gullet.expand_next_token();
+        if self.error.is_none() {
+            if let Some(err) = self.gullet.take_error() {
+                self.error = Some(err);
+            }
+        }
+        self.next_token = Some(token);
+    }
+    return self.next_token.as_ref().unwrap();
+}
+```
+`next_token` 是前瞻缓存。只有缓存为空时，函数才调用宏展开器取得下一个 token，同时保留原来的错误传递逻辑；最后的 `as_ref()` 将缓存中的 `Token` 借用为 `&Token`，不会复制 token 的文本和位置对象。
+
+返回的引用绑定于这次对解析器的借用。使用它期间，调用方不能同时修改相冲突的解析器状态；当只读检查结束，借用也就可以结束。兼容入口 `fetch()` 仍然调用 `self.fetch_ref().clone()`，因此优化的关键是让只检查文本的调用点改用 `fetch_ref()`，而不是宣称所有克隆都被消除了。
+
+确认要消费 token 时，`parse_symbol()` 的 ASCII 分支会取走缓存中的对象。以下是该分支内部的节选：
+
+```rust
+let nucleus = self.next_token.take().unwrap();
+let loc = nucleus.loc;
+let text = nucleus.text;
+```
+`Option::take()` 把缓存置为 `None`，同时返回原来的 token。随后 `loc` 和 `text` 被移入新节点，字符串内容不必再复制。这里的 `unwrap()` 依赖此前 `fetch_ref()` 已填充缓存，不能脱离这个前提照搬。
+
+排版树也采用相同思路。[build/common.rs](https://github.com/dashuai009/katex-wasm/blob/main/src/build/common.rs) 的 `get_vlist_children_and_depth` 按值接收参数，并用 `params.children.into_iter()` 消费原容器。在计算子节点尺寸时借用 `&child`，计算结束后再通过 `children.push(child)` 把节点移入新容器。
+
+**借用检查器要求我们明确数据的使用关系，但不要求我们用复制解决所有问题。** 遇到大量 `clone()` 时，可以先问：调用方真的需要独立副本吗？原来的所有者之后还会使用这份数据吗？如果后一个答案是否定的，所有权转移往往更合适。
+
+## 2. 共享不可变数据，把重复准备工作移出热路径
+
+另一个典型问题是 token 的源码位置信息。原实现中，复制位置对象可能连同完整输入字符串一起复制。一条公式会产生许多 token，反复复制整段输入既浪费内存，也增加分配器压力。
+
+[SourceLocation.rs](https://github.com/dashuai009/katex-wasm/blob/main/src/SourceLocation.rs) 现在通过 `Arc<String>` 共享输入。以下省略了 WASM 导出属性：
+
+```rust
+#[derive(Clone)]
+pub struct LexerInterface {
+    input: std::sync::Arc<String>,
+    token_regex: &'static Regex,
+    last_index: usize,
+}
+```
+`SourceLocation` 仍然可以克隆 `LexerInterface`，但派生的 `Clone` 会共享 `input` 的所有权，复制正则引用和索引值，不再复制整段输入文本。位置信息活得比最初的词法分析器更久时，共享所有权也能保证输入仍然存在。
+
+不过，`Arc::clone()` 并不是零成本操作：它仍然需要维护引用计数。这里共享的是较大的、不会修改的输入；不应该机械地把所有普通字段都改成 `Arc`。
+
+### 内置宏可以共享，用户宏仍保留独立状态
+
+[macro_expander.rs](https://github.com/dashuai009/katex-wasm/blob/main/src/define/macros/macro_expander.rs) 将内置宏表放在线程局部存储中：
+
+```rust
+thread_local! {
+    static BUILTIN_MACROS: crate::Namespace::Builtins<MacroDefinition> =
+        prepare_builtins();
+}
+```
+`prepare_builtins()` 在每个线程首次访问时执行，创建内置宏表，并把可以安全预处理的固定宏体转成 token 序列。新建宏展开器时，下面这段代码共享内置表，同时建立本次渲染使用的宏命名空间：
+
+```rust
+Namespace::<MacroDefinition>::new(
+    BUILTIN_MACROS.with(std::sync::Arc::clone),
+    settings.get_ref_macros(),
+)
+```
+内置规则的准备工作不必每次重复，用户宏的可变状态也不会因为共享内置表而变成一份全局状态。线程局部初始化还兼顾了 native CLI 的使用方式。
+
+预处理并不覆盖所有宏体。源码中明确保留了这个条件：
+
+```rust
+// 节选：注释诊断依赖当前设置，留在运行时处理。
+if body.contains('%') { continue; }
+```
+
+这说明缓存的正确性取决于数据是否真的稳定。某些宏体中的注释诊断依赖当前设置，就不能用默认设置提前处理。
+
+这里可以进一步区分两种缓存：**结构性数据缓存**保存固定规则、宏定义和字体度量等可复用信息；**结果缓存**保存某条公式最终生成的 HTML。这轮优化使用的是前者，每次调用仍然执行解析和排版，没有缓存整条公式的渲染结果。
+
+## 3. 数据表示，往往比局部指令优化更重要
+
+原来的 `CssStyle` 为每个节点预留了 23 个 `Option<String>` 字段。它很直观，但许多节点没有内联样式，或者只有一个样式属性。为空字段预留大量空间，会增加结构体初始化、复制和存储的成本。
+
+[css_style.rs](https://github.com/dashuai009/katex-wasm/blob/main/src/dom_tree/css_style.rs) 将其改为稀疏表示：
+
+```rust
+#[derive(Clone, Default)]
+pub struct CssStyle {
+    values: smallvec::SmallVec<[(u8, Option<String>); 1]>,
+}
+```
+
+每个条目用 `u8` 标识属性，`Option<String>` 保存属性值。`SmallVec` 的内联容量是 1：常见的单属性情况直接存放在结构体内部，超过容量才为条目数组分配堆内存。这里避免的是容器的一次分配，属性值中的 `String` 仍可能分配。
+
+### SmallVec    v.s. c++26 std::inplate_vector 是否类似
+
+是，**“把元素内联存放在容器对象里”这个思路类似，但容量语义不同**。
+
+| | Rust `SmallVec<[T; N]>` | C++26 `std::inplace_vector<T, N>` |
+|---|---|---|
+| `N` 的含义 | 内联容量 | 最大容量 |
+| 元素较少时 | 可以直接存放在对象内部 | 始终存放在对象内部 |
+| 超过 `N` 时 | 自动转为堆存储，继续增长 | 不会扩容；普通 `push_back` 抛出 `std::bad_alloc` |
+| 适用情况 | 通常很少，偶尔很多 | 数量有明确上限 |
+
+这些区别见 [SmallVec 文档](https://docs.rs/smallvec/latest/smallvec/struct.SmallVec.html)和 [C++ 标准草案](https://eel.is/c++draft/inplace.vector.overview)。
+
+文中的：
+
+```rust
+SmallVec<[(u8, Option<String>); 1]>
+```
+
+表示**为一个样式条目提供内联空间**，并不是最多只能有一个属性。从空容器开始插入，第一个条目内联保存，插入第二个时会把整个条目序列移到堆上，保持连续存储。
+
+因此，这里选择 `SmallVec` 是因为“多数节点只有零到一个样式，但允许更多”。如果换成 `inplace_vector<StyleEntry, 1>`，第二个属性就放不下了。C++ 中更接近它的是 [`llvm::SmallVector<T, N>`](https://llvm.org/docs/ProgrammersManual.html#llvm-adt-smallvector-h)。
+
+另外，**内联不等于栈上**：容器自身在堆上时，内联元素也随它位于堆上；这里避免的是额外的条目数组分配，条目里的 `String` 内容仍可能单独分配。
+
+
+### 稀疏存储与稳定顺序
+
+写入属性时，源码按属性编号找到已有条目，或者在正确的位置插入新条目：
+
+```rust
+fn value_mut(&mut self, key: u8) -> &mut Option<String> {
+    let index = match self.values.binary_search_by_key(&key, |entry| entry.0) {
+        Ok(index) => index,
+        Err(index) => {
+            self.values.insert(index, (key, None));
+            index
+        }
+    };
+    &mut self.values[index].1
+}
+```
+`binary_search_by_key` 同时给出查找结果和插入位置，使内部条目保持规范顺序。序列化只需顺序遍历，就能稳定输出属性，而不受设置先后顺序影响。
+
+这种表示也有代价：读属性需要查询，插入条目可能移动后续元素，不再是固定偏移的字段访问。实际样式很少时，这些小规模操作才有机会抵消较大结构体的成本。内联容量也不能越大越好，因为它会放大每一个 `CssStyle`，包括那些根本没有样式的节点。
+
+### 表示改变后，仍要保留逻辑相等
+
+需要留意，`value_mut()` 可能插入 `(key, None)`。删除属性也可能留下这样的空槽位，因此内部条目数组不同，不代表样式不同。实现中的判等会先过滤没有值的条目：
+
+```rust
+impl PartialEq for CssStyle {
+    fn eq(&self, other: &Self) -> bool {
+        self.values
+            .iter()
+            .filter_map(|(key, value)| value.as_ref().map(|value| (key, value)))
+            .eq(other
+                .values
+                .iter()
+                .filter_map(|(key, value)| value.as_ref().map(|value| (key, value))))
+    }
+}
+```
+`filter_map` 只保留有效属性，再按规范顺序比较。因此“没有设置颜色”和“设置后又删除颜色”可以相等；`is_empty()` 也检查所有值是否为 `None`，而不是只检查容器长度。
+
+这会影响字符节点能否合并，不能当成内部细节忽略。与此同时，派生的 `Clone` 仍为样式值提供独立副本，修改克隆后的样式不会改变原对象。内存优化必须同时守住输出顺序、删除语义和克隆隔离。
+
+## 4. 字符串构建，需要关注分配次数和累计复制量
+
+HTML 生成很容易出现这样的递归模式：
+
+```text
+子节点生成字符串 → 父节点复制子字符串 → 更上层节点再次复制
+```
+
+层级越深，同一段内容就可能被复制越多次。为此，我们增加了追加式接口 `write_markup(&self, output: &mut String)`，父节点传入同一个输出缓冲区，子节点直接向其中写入。
+
+[document_fragment.rs](https://github.com/dashuai009/katex-wasm/blob/main/src/dom_tree/document_fragment.rs) 中的实现很短：
+
+```rust
+fn write_markup(&self, output: &mut String) {
+    for child in &self.children {
+        child.write_markup(output);
+    }
+}
+
+/** Convert the fragment into HTML markup. */
+fn to_markup(&self) -> String {
+    let mut markup = String::new();
+    self.write_markup(&mut markup);
+    return markup;
+}
+```
+`to_markup()` 仍然提供“返回一个字符串”的外部接口，但只在入口创建缓冲区。递归时调用 `write_markup()`，整个 fragment 的子节点共享同一个输出目标，减少中间字符串及完整子树 HTML 的重复复制。
+
+缓冲区容量不足时仍然可能扩容，所以追加式写入并不意味着“绝对只分配一次”。它消除的是每层先构造临时结果、再交给父层复制的模式。`span`、链接和符号节点也实现了相应写入路径。
+
+### HTML 转义：普通文本按片段复制
+
+转义代码中还发现过一个细小但高频的问题：
+
+```rust
+// 原先的逐字符写法：临时 String 随即被复制并释放。
+out.push_str(&c.to_string());
+```
+
+[utils.rs](https://github.com/dashuai009/katex-wasm/blob/main/src/utils.rs) 的 `escape_to()` 改成扫描字节，遇到特殊字符才输出替换文本：
+
+```rust
+pub fn escape_to(out: &mut String, text: &str) {
+    let mut start = 0;
+    for (i, byte) in text.bytes().enumerate() {
+        let replacement = match byte {
+            b'&' => "&amp;",
+            b'>' => "&gt;",
+            b'<' => "&lt;",
+            b'"' => "&quot;",
+            b'\'' => "&#x27;",
+            _ => continue,
+        };
+        // ASCII delimiter offsets are always valid UTF-8 boundaries.
+        out.push_str(&text[start..i]);
+        out.push_str(replacement);
+        start = i + 1;
+    }
+    out.push_str(&text[start..]);
+}
+```
+`start` 标记尚未写出的普通文本起点。遇到特殊字符时，先一次性追加它前面的连续片段，再写入转义内容，最后处理剩余尾部。普通字符不再逐个创建临时 `String`，CSS 属性值也可以复用这个追加式接口。
+
+这里有一个容易忽略的 Rust 知识点：**字符串切片的范围使用字节偏移，切分点必须落在 UTF-8 边界上。** 本实现只在 ASCII 分隔符处切分；UTF-8 多字节字符的内部字节不会等于这些 ASCII 值，因此 `i` 和 `i + 1` 都是合法边界。这项推理不能直接推广成“任意字节位置都能切片”。
+
+### 数字输出：快速路径必须保留舍入行为
+
+排版过程中会频繁生成 `2.7em`、`0.05em` 等字符串。[units.rs](https://github.com/dashuai009/katex-wasm/blob/main/src/units.rs) 的 `make_em()` 将普通情况转换为整数部分和小数部分：
+
+```rust
+pub fn make_em(n: f64) -> String {
+    let scaled = n.abs() * 10000.0;
+    // Stay within exact integer precision, and defer halfway cases to Rust's
+    // correctly rounded formatter. This preserves the previous four digits.
+    if !n.is_finite() || scaled >= 1e12 || (scaled.fract() - 0.5).abs() <= scaled * f64::EPSILON * 2.0 {
+        return format!("{:.4}em", n);
+    }
+    let rounded = scaled.round() as u64;
+    let mut output = String::with_capacity(24);
+    if n.is_sign_negative() && rounded != 0 { output.push('-'); }
+    let mut digits = itoa::Buffer::new();
+    output.push_str(digits.format(rounded / 10000));
+    let fraction = (rounded % 10000) as u32;
+    if fraction != 0 {
+        output.push('.');
+        output.push(char::from_digit(fraction / 1000, 10).unwrap());
+        output.push(char::from_digit(fraction / 100 % 10, 10).unwrap());
+        output.push(char::from_digit(fraction / 10 % 10, 10).unwrap());
+        output.push(char::from_digit(fraction % 10, 10).unwrap());
+        while output.ends_with('0') { output.pop(); }
+    }
+    output.push_str("em");
+    output
+}
+```
+先把绝对值放大 10000 倍并舍入，再用整数除法和取余拆出两部分。`itoa::Buffer` 格式化整数部分，小数部分补足四位后删除尾随零，所以 `2.7000em` 可以输出成 `2.7em`；舍入结果为零时不写负号，`-0.0` 输出为 `0em`。
+
+关键在最前面的回退条件。非有限数、较大的值，以及接近半整数舍入边界的值，仍交给原来的 `format!("{:.4}em", n)`。简单的放大再 `round()` 不能保证在这些位置与原格式化器一致。
+
+测试不仅检查几个字符串例子，还包含负零、边界值、非有限值，以及 100,000 个生成数值与四位小数参考结果的对照。项目的部分其他浮点输出使用 `ryu`，但不能把它与这里的固定精度舍入策略混为一谈。数值格式化的优化不能只验证“看起来一样”。
+
+## 5. 给常见输入建立快速路径，并保留完整回退
+
+LaTeX 源码中大量内容是 ASCII：字母、数字、括号、运算符以及反斜杠命令。为这些常见 token 增加直接字节扫描路径，可以减少正则捕获的开销。
+
+[Lexer.rs](https://github.com/dashuai009/katex-wasm/blob/main/src/Lexer.rs) 中，快速扫描器返回 `Option<String>`：成功时给出 token 文本并更新结束位置；不能安全处理时返回 `None`，交回原来的正则路径。
+
+反斜杠命令中的字母扫描如下，节选自 `lex_ascii_text()`：
+
+```rust
+let mut end = pos + 2;
+while end < bytes.len()
+    && (bytes[end].is_ascii_alphabetic() || bytes[end] == b'@')
+{
+    end += 1;
+}
+let text = input[pos..end].to_owned();
+while end < bytes.len() && is_space(bytes[end]) {
+    end += 1;
+}
+```
+扫描从反斜杠和首个命令字母之后继续。先截取命令文本，再跳过后面的空白：token 文本不包含这些空白，但词法分析器的结束位置必须越过它们。只比较 token 文本而不比较结束偏移，就可能漏掉错误。
+
+普通 ASCII 字符也不能无条件走快速路径。后面紧跟组合音标时，源码主动回退：
+
+```rust
+if input[pos + 1..]
+    .chars()
+    .next()
+    .is_some_and(|c| ('\u{0300}'..='\u{036f}').contains(&c))
+{
+    return None;
+}
+```
+例如字母 `e` 后面跟组合重音，不能仅因为首字节是 ASCII 就拆成一个普通字符 token。Unicode、组合音标和控制空格等情况保留原处理路径；回归测试对照快速路径与参考正则的 token 文本和结束位置。
+
+这类优化的关键是明确适用范围：
+
+```text
+满足快速路径条件 → 使用专门实现
+否则             → 回到完整实现
+```
+
+类似的优化还包括 ASCII 符号和字体度量的数组索引、固定数学间距的小型查找表，以及固定内部命令名称的快速哈希。用户可修改的宏映射仍保留随机化哈希。
+
+数据结构的选择需要考虑键空间：键如果是有限范围内的字符编码，数组通常比“整数转字符串，再查哈希表”更直接；但不能据此把所有动态映射都换成数组或同一种哈希器。
+
+## 6. 减少分配之后，再优化分配器
+
+浏览器采样显示，分配和释放仍然占据明显的执行时间。因此，项目为默认的非 atomics WASM 构建使用 Talc，并在其上增加一个有上限的小块空闲链表。显式启用 `wee_alloc` 时仍优先使用该配置；native 和 atomics 构建不安装这个缓存分配器。
+
+[wasm_allocator.rs](https://github.com/dashuai009/katex-wasm/blob/main/src/wasm_allocator.rs) 定义了 11 个尺寸档位，每档最多保留 1024 个已释放块：
+
+```rust
+const SIZES: [usize; 11] = [16, 32, 64, 96, 128, 192, 256, 384, 512, 768, 1024];
+const LIMIT: usize = 1024;
+const ALIGN: usize = 16;
+```
+申请时选择能容纳请求的最小档位；超过最大尺寸或要求高于 16 字节的对齐时，直接交给底层分配器。缓存块使用档位对应的尺寸和对齐，因此同档块可以安全复用。
+
+```text
+申请小块内存：
+  对应尺寸档位有空闲块 → 直接复用
+  否则                 → 向底层分配器申请
+
+释放小块内存：
+  缓存未满 → 放回对应链表
+  缓存已满 → 交还底层分配器
+```
+
+释放路径的关键分支如下：
+
+```rust
+if bucket.count < LIMIT {
+    block.cast::<*mut u8>().write(bucket.head);
+    bucket.head = block;
+    bucket.count += 1;
+} else {
+    self.base.dealloc(block, Self::layout(index));
+}
+```
+已释放块的开头用于存放“下一个空闲块”的指针，因而不需要另外分配链表节点。这个写入只允许发生在调用方已经交还内存之后；对仍然存活的对象这样做，会直接破坏其数据。
+
+重新分配时，如果新旧布局属于同一档位，可以直接返回原地址：
+
+```rust
+if let Some(index) = Self::bucket(old) {
+    if Self::bucket(new) == Some(index) {
+        return block;
+    }
+}
+```
+这里成立的原因是底层最初就按整个档位分配，原块足以容纳新的逻辑尺寸。跨档位时仍需取得新块，并复制新旧尺寸中较小的那部分；不能把这一局部返回当作完整的 `realloc` 实现。
+
+每档缓存上限乘以档位大小后求和，约为 **3.39 MiB**，这是可保留的空闲块容量上限，不是整个 WASM 线性内存的上限。
+
+最重要的生命周期约束是：**缓存只能复用已经释放的内存，不能因为“一条公式渲染结束了”，就回收仍可能被其他对象引用的内存。** 因此这里没有使用整批回收对象的 arena reset。实现也没有并发同步能力，只适用于其限定的单线程使用条件。
+
+测试除了检查渲染结果，还覆盖地址对齐、重新分配后的数据完整性，以及连续多轮渲染后的内存稳定性。这些约束是分配器优化的一部分，不是额外装饰。
+
+## 7. 性能优化必须有可信的测量口径
+
+这轮工作也修整了基准测试流程，因为错误的测试方法很容易制造“优化成功”的假象。
+
+当前 [benchmark.js](https://github.com/dashuai009/katex-wasm/blob/main/demo/benchmark.js) 的默认规则是：
+
+- 三个引擎使用完整的同一份 `demo/public/formulas.txt` 和相同设置。
+- 两轮完整预热、六轮正式测量，不丢弃开头几条公式。
+- 轮换引擎执行顺序。
+- 只测 HTML 生成，不把 DOM 插入或布局混入。
+- 主指标采用整批耗时的中位数，保留每轮数据。
+- 保存输入、源码和 WASM 指纹，防止误测旧构建。
+
+轮换执行顺序的核心代码是：
+
+```javascript
+const order = engines.map((_, i) => engines[(i + r) % 3]);
+```
+
+`r` 是轮次。三方依次轮换首位，减少总让同一个引擎先运行带来的顺序偏差。两轮预热不进入正式统计，但也执行完整输入。预热后的测量没有包含下载、模块初始化等首次加载成本。
+
+### 行为一致，不等于支持了所有公式
+
+我们的目标是复现 KaTeX.js 的行为。如果 JS 对某条输入返回错误输出，而 Rust 返回等价的错误输出，这也是一致的行为。若抛异常，则比较类别和消息，不能把通用 WASM trap 当作等价的 JS 解析错误。
+
+当前代码明确让所有输入参与计时：
+
+```javascript
+// Time every input. Matching error outputs/exceptions are valid parity cases.
+const common = formulas.map((_, i) => i);
+```
+
+虽然变量还叫 `common`，这里保存的已经是**全部输入索引**，并没有过滤出三方共同成功子集。第三方是否支持某条公式，也不会改变 JS 与本项目的行为一致性判断或计时集合。
+
+批次计时同时记录输出或异常的长度校验和，以及逐公式样本：
+
+```javascript
+function batch(engine, measured) {
+  const values = [];
+  const start = performance.now();
+  for (const i of common) {
+    const t = performance.now();
+    try {
+      const html = engine.render(formulas[i], { ...settings });
+      checksum = (checksum + html.length) >>> 0;
+    } catch (error) {
+      checksum = (checksum + String(error).length) >>> 0;
+    }
+    if (measured) values.push(performance.now() - t);
+  }
+  const total = performance.now() - start;
+  if (measured) samples[engine.id].push(...values);
+  return total;
+}
+```
+批次时钟包围整个循环，调用间没有 DOM 操作；逐条样本用于分布观察，整批耗时用于主指标。计时范围仍包含设置对象复制、逐条读时钟、收集样本和更新校验和等基准框架开销，不能称为剥离一切开销后的纯 Rust 内核耗时。三方使用相同包装，测量结论也必须限定在这个协议下。
+
+此外，捕获异常只是让测试继续进行，不代表认可异常行为。一致性预检独立保存 mismatch 的参考输出和实际输出；不能因为计时循环完成就判断正确性通过。
+
+### 历史结果保留原始口径
+
+开头的性能改进来自旧版 schema 2。保存的批次数据如下：
+
+| 历史运行 | katex-wasm | KaTeX.js | 上游 katex-rs |
+| --- | ---: | ---: | ---: |
+| opt0，初始实现 | 102.30 ms | 23.05 ms | 36.45 ms |
+| opt24，独立浏览器 | 21.35 ms | 22.90 ms | 37.30 ms |
+| opt25，独立浏览器 | 21.50 ms | 22.90 ms | 37.45 ms |
+| opt26，独立浏览器 | 21.45 ms | 22.70 ms | 37.30 ms |
+
+每行都是同一历史共同成功子集上的整批耗时中位数。opt0 的表格值由未修改的原始轮次按中间两项平均重新计算；三个最终运行再取中位数，得到本项目的 21.45 ms。相关报告保存于 [docs/performance-results](https://github.com/dashuai009/katex-wasm/tree/main/docs/performance-results)。
+
+需要同时保留它的边界：
+
+| 项目 | 历史优化报告：schema 2 | 当前 Demo：schema 3 |
+| --- | --- | --- |
+| 输入来源 | im2latex 物理行 1–1000 | 完整 `formulas.txt` |
+| 计时集合 | 三方共同成功的 397 条 | 全部输入，包含错误结果 |
+| 一致性与支持情况 | 成功子集用于性能统计，差异检查另行记录 | 以 JS 行为为基准，匹配错误也可一致 |
+| 可否直接比较 | 仅在相同协议、输入和计时范围内比较 | 不能直接接到旧版曲线上 |
+
+历史报告中的另外 603 条输入没有凭空消失，其索引和内容仍保存在原始结果中；匹配错误输出不意味着成功支持了这些公式。报告中另有全输入尝试吞吐量和 HTML 加 DOM、同步布局的补充测试，它们也必须与上述 HTML 成功子集数据分开。
+
+保留原始数据、构建指纹和协议版本，才能避免把口径变化、旧产物或初始化差异误认为性能提升。采样火焰图应单独录制，也不能拿带 profiler 的运行充当最终性能证据。
+
+## 构建与验证：让读者能沿着同一条路径复查
+
+当前仓库用构建脚本包装 `wasm-pack`，生成 release 产物，并记录源码与 WASM 的 SHA-256。旧文中单独运行 `wasm-pack build` 的步骤不足以完成这套指纹记录；发布配置也已采用优化级别 3、fat LTO 和 Binaryen `-O4`，不再是此前以 `opt-level = "s"` 描述的配置。
+
+从仓库根目录开始构建三方 Demo：
+
+```sh
+node scripts/build-wasm.mjs
+node scripts/build-katex-rs.mjs
+cd demo
+npm ci
+npx playwright install chromium
+npm run build:site
+npm run serve
+```
+
+第一个脚本构建本项目并记录指纹，第二个构建锁定版本的上游 katex-rs。`build:site` 只打包已有 WASM；修改 Rust 后，需要在 `demo` 执行 `npm run build`，重新生成本项目 WASM 和页面，避免前端继续使用旧包。
+
+本地批处理仍可以使用 CLI。下面从第 1 条开始处理 5 条公式，并只输出汇总：
+
+```sh
+cargo run --bin katex-rs-cli -- tests/fixtures/formulas.txt 1 5 --summary-only
+```
+
+验证则分成几种职责：
+
+```sh
+# 仓库根目录：局部算法与分配器等回归测试。
+cargo test --lib
+
+# 在重新构建 WASM 后，进入 demo。
+cd demo
+npm run test:correctness
+npm run test:api
+npm run build:site
+npm run perf:playwright
+```
+
+`test:correctness` 保留了 im2latex 前 1000 行内随机连续 50 行的独立正确性检查，并记录抽样位置，不能因为失败就更换样本。`test:api` 检查 WASM 接口行为；性能脚本则运行当前 Demo 的全输入协议。这几个入口承担不同职责，不能把一次成功率检查当成语义对齐证明。
+
+Diff Harness 对比 DOM 结构、文本和属性语义，保留既有 `0.001em` 数值容差；独立属性的排列和部分数值格式可以规范化，但重复声明及会相互覆盖的样式必须保持语义。历史全 1000 条 HTML 检查通过，也只说明该集合在这些比较规则下通过，不等于覆盖了全部 KaTeX 功能。
+
+如果要检查 GitHub Pages 子路径下的实际页面，还需要生成相应静态产物并运行 UI 验证：
+
+```sh
+# 在 demo 目录执行。
+PUBLIC_PATH=/katex-wasm/ npm run build:site
+npm run test:ui
+```
+
+这一步关注页面、资源与持续渲染等浏览器行为。若要声称性能优势能够复现，还应使用相同协议，在多个新浏览器进程中重复测量。代码覆盖率可以帮助寻找未执行分支，但覆盖率、输出一致性和性能分别回答不同的问题，不能互相替代。
+
+这轮优化最有价值的经验是：先通过采样找到高频开销，再沿着数据的生命周期检查复制、分配、表示和输出方式。跨语言移植不仅要复现算法，也要重新审视这些操作在目标语言中的实际成本；性能测试则需要让输入、构建产物和测量范围都能被复查。
